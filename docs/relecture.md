@@ -153,7 +153,7 @@ Seul fichier en français. Corrige directement `content.js` (ou note ici) avant 
 | l-se | ثِه | ث | même son que سه (trois) |
 | l-jim | جیم | ج |  |
 | l-che | چِه | چ |  |
-| l-hejimi | حِه جیمی | ح | nom complet pour ne pas confondre avec ه |
+| l-hejimi | حِه جیمی | ح | nom complet pour ne pas confondre avec ه ; prononciation fausse après 2 essais, Afshin laisse ainsi (2026-10-30) |
 | l-khe | خِه | خ | voix IA « خه » (2e essai, choisi à l'écoute) |
 | l-dal | دال | د |  |
 | l-zal | ذال | ذ |  |
