@@ -80,7 +80,7 @@ Seul fichier en français. Corrige directement `content.js` (ou note ici) avant 
 | ab | آب | آب | 💧 | eau |  |
 | nun | نون | نان | 🍞 | pain | même son que la lettre ن |
 | sib | سیب | سیب | 🍎 | pomme |  |
-| moz | موز | موز | 🍌 | banane |  |
+| moz | موز | موز | 🍌 | banane | voix IA lancée avec « مُز » (choisi à l'écoute) |
 | berenj | برنج | برنج | 🍚 | riz |  |
 | panir | پنیر | پنیر | 🧀 | fromage |  |
 | tokhmemorgh | تخم‌مرغ | تخم‌مرغ | 🥚 | œuf |  |
