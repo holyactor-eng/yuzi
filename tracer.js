@@ -1,12 +1,71 @@
 // Tracer les lettres au doigt (dès 4 ans) : la lettre en filigrane, le doigt la remplit d'une couleur lumineuse
 // qui ondule comme un liquide, des étincelles suivent le doigt. Lettre recouverte aux 4/5 : bravo, son nom, lettre suivante.
-// ponytail: on mesure la surface recouverte, pas le sens du tracé ; un ordre des traits demanderait un chemin dessiné par lettre.
+// Des flèches numérotées montrent le sens et l'ordre des traits, puis les points.
+// ponytail: on mesure la surface recouverte, pas le sens réel du doigt ; les flèches guident sans juger.
 import { MOTS } from './content.js';
 import { jouer, bip } from './audio.js';
 
 const LETTRES = Object.values(MOTS).filter((m) => m.lettre);
 const SEUIL = 0.8;
 const BASSE = 160; // résolution de la grille de mesure
+
+// Sens d'écriture : traits dessinés à la main sur Vazirmatn, dans la boîte du corps de la lettre (0..1, y vers le bas).
+// Les points (nuqte) sont trouvés tout seuls : ce sont les morceaux de la lettre qu'aucun trait ne traverse.
+const TRAITS = {
+  'ا': [[[.5, .03], [.5, .97]]],
+  'ب': [[[.92, .06], [.92, .55], [.8, .8], [.5, .82], [.2, .8], [.1, .55], [.1, .08]]],
+  'ح': [[[.06, .2], [.35, .08], [.65, .12], [.95, .18], [.6, .2], [.3, .35], [.15, .6], [.25, .88], [.55, .95], [.95, .88]]],
+  'د': [[[.32, .08], [.7, .3], [.88, .55], [.75, .82], [.05, .85]]],
+  'ر': [[[.75, .06], [.72, .45], [.55, .75], [.08, .9]]],
+  'س': [[[.96, .06], [.93, .6], [.72, .6], [.68, .12], [.64, .6], [.5, .55], [.47, .12], [.45, .7], [.3, .92], [.12, .85], [.05, .25]]],
+  'ص': [[[.5, .5], [.65, .15], [.85, .05], [.98, .35], [.85, .62], [.55, .65], [.45, .75], [.3, .95], [.12, .9], [.05, .25]]],
+  'ط': [[[.35, .6], [.6, .4], [.85, .45], [.95, .65], [.8, .88], [.05, .9]], [[.3, .05], [.3, .75]]],
+  'ع': [[[.85, .12], [.55, .04], [.33, .15], [.4, .33], [.7, .38], [.35, .45], [.15, .65], [.25, .92], [.55, .97], [.95, .85]]],
+  'ف': [[[.68, .65], [.7, .2], [.82, .05], [.95, .25], [.95, .65], [.75, .92], [.35, .92], [.1, .75], [.05, .32]]],
+  'ق': [[[.55, .6], [.58, .2], [.72, .05], [.92, .15], [.95, .55], [.75, .92], [.35, .95], [.1, .75], [.08, .15]]],
+  'ک': [[[.97, .07], [.55, .38], [.6, .5], [.9, .7], [.8, .92], [.3, .92], [.07, .8], [.05, .45]]],
+  'گ': [[[.93, .13], [.55, .42], [.6, .52], [.92, .72], [.8, .93], [.3, .93], [.05, .8], [.05, .42]], [[1.02, -.15], [.55, .05]]],
+  'ل': [[[.86, .03], [.86, .72], [.7, .95], [.35, .95], [.12, .8], [.1, .45]]],
+  'م': [[[.45, .45], [.55, .15], [.8, .03], [.97, .25], [.85, .52], [.5, .55], [.25, .45], [.15, .6], [.15, .97]]],
+  'ن': [[[.92, .06], [.92, .55], [.7, .92], [.3, .92], [.08, .55], [.08, .1]]],
+  'و': [[[.5, .5], [.15, .35], [.3, .05], [.7, .05], [.9, .35], [.85, .7], [.5, .85], [.05, .92]]],
+  'ه': [[[.4, .05], [.12, .5], [.25, .9], [.7, .92], [.92, .6], [.7, .35], [.4, .05]]],
+  'ی': [[[.95, .1], [.65, .15], [.6, .4], [.9, .6], [.75, .9], [.4, .95], [.12, .75], [.1, .2]]],
+};
+const FAMILLE = { 'پ': 'ب', 'ت': 'ب', 'ث': 'ب', 'ج': 'ح', 'چ': 'ح', 'خ': 'ح', 'ذ': 'د', 'ز': 'ر', 'ژ': 'ر', 'ش': 'س', 'ض': 'ص', 'ظ': 'ط', 'غ': 'ع' };
+export const traitsDe = (lettre) => TRAITS[FAMILLE[lettre] ?? lettre];
+
+// Morceaux d'un dessin (composantes connexes des pixels opaques) : taille, boîte, centre.
+function morceaux(rgba, n) {
+  const lab = new Int32Array(n * n).fill(-1), out = [];
+  for (let i = 0; i < n * n; i++) {
+    if (rgba[i * 4 + 3] <= 128 || lab[i] >= 0) continue;
+    const m = { n: 0, x0: n, y0: n, x1: 0, y1: 0, cx: 0, cy: 0 }, pile = [i];
+    lab[i] = out.length;
+    while (pile.length) {
+      const j = pile.pop(), x = j % n, y = (j / n) | 0;
+      m.n++; m.cx += x; m.cy += y;
+      m.x0 = Math.min(m.x0, x); m.x1 = Math.max(m.x1, x); m.y0 = Math.min(m.y0, y); m.y1 = Math.max(m.y1, y);
+      for (const [v, ok] of [[j - 1, x > 0], [j + 1, x < n - 1], [j - n, y > 0], [j + n, y < n - 1]]) {
+        if (ok && lab[v] < 0 && rgba[v * 4 + 3] > 128) { lab[v] = out.length; pile.push(v); }
+      }
+    }
+    m.cx /= m.n; m.cy /= m.n;
+    out.push(m);
+  }
+  return out;
+}
+
+// Adoucit une ligne brisée (Chaikin) en gardant ses deux bouts.
+function lisser(pts) {
+  for (let k = 0; k < 3; k++) {
+    pts = [pts[0], ...pts.slice(0, -1).flatMap(([ax, ay], j) => {
+      const [bx, by] = pts[j + 1];
+      return [[ax * .75 + bx * .25, ay * .75 + by * .25], [ax * .25 + bx * .75, ay * .25 + by * .75]];
+    }), pts.at(-1)];
+  }
+  return pts;
+}
 
 export const nbLettres = LETTRES.length;
 
@@ -90,8 +149,10 @@ export async function ecranTracer(app, i) {
   g.fillText(m.ecrit, x0, y0);
   g.restore();
   const cibles = [];
-  g.getImageData(0, 0, BASSE, BASSE).data.forEach((v, j) => { if (j % 4 === 3 && v > 128) cibles.push(j); });
+  const forme = g.getImageData(0, 0, BASSE, BASSE).data;
+  forme.forEach((v, j) => { if (j % 4 === 3 && v > 128) cibles.push(j); });
   g.clearRect(0, 0, BASSE, BASSE);
+  guider(f, traitsDe(m.ecrit), morceaux(forme, BASSE), 1 / s, pinceau);
   g.lineCap = g.lineJoin = 'round';
   g.lineWidth = pinceau * s;
   const couverture = () => {
@@ -189,6 +250,51 @@ export async function ecranTracer(app, i) {
     fini = false;
     if (vague) { vague.sale = true; relancer(); }
   });
+}
+
+// Le chemin à suivre, sous la peinture : pastille verte numérotée au départ, pointillés et flèches orange,
+// puis une pastille par point à poser. Les morceaux sont en coordonnées de la grille, `e` les ramène à la toile.
+function guider(ctx, traits = [], parts, e, pinceau) {
+  if (!parts.length) return;
+  const corps = parts.reduce((a, b) => (b.n > a.n ? b : a));
+  const bx = corps.x0 * e, by = corps.y0 * e, bw = (corps.x1 - corps.x0 + 1) * e, bh = (corps.y1 - corps.y0 + 1) * e;
+  const chemins = traits.map((t) => lisser(t.map(([u, v]) => [bx + u * bw, by + v * bh])));
+  const touche = (q) => chemins.some((c) => c.some(([x, y]) => x >= q.x0 * e && x <= (q.x1 + 1) * e && y >= q.y0 * e && y <= (q.y1 + 1) * e));
+  const points = parts.filter((q) => q !== corps && !touche(q)).sort((a, b) => b.cx - a.cx);
+  const r = pinceau * 0.36;
+  const pastille = (x, y, n) => {
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#2bb673';
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.font = `900 ${r * 1.3}px Vazirmatn, Tahoma, sans-serif`;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(n.toLocaleString('fa'), x, y + r * 0.08);
+  };
+  const fleche = (x, y, a, t) => {
+    ctx.save(); ctx.translate(x, y); ctx.rotate(a);
+    ctx.beginPath(); ctx.moveTo(t, 0); ctx.lineTo(-t * 0.7, t * 0.8); ctx.lineTo(-t * 0.7, -t * 0.8); ctx.closePath(); ctx.fill();
+    ctx.restore();
+  };
+  ctx.save();
+  ctx.lineCap = ctx.lineJoin = 'round';
+  chemins.forEach((c) => {
+    ctx.strokeStyle = ctx.fillStyle = '#ff8a1f';
+    ctx.lineWidth = pinceau * 0.09;
+    ctx.setLineDash([pinceau * 0.22, pinceau * 0.22]);
+    ctx.beginPath(); c.forEach(([x, y], j) => (j ? ctx.lineTo(x, y) : ctx.moveTo(x, y))); ctx.stroke();
+    // Une flèche tous les ~2 pinceaux, et une au bout.
+    let reste = pinceau * 1.6;
+    for (let j = 1; j < c.length; j++) {
+      const [ax, ay] = c[j - 1], [cx, cy] = c[j], l = Math.hypot(cx - ax, cy - ay);
+      if ((reste -= l) > 0 && j < c.length - 1) continue;
+      reste = pinceau * 2;
+      fleche(cx, cy, Math.atan2(cy - ay, cx - ax), pinceau * 0.3);
+    }
+  });
+  chemins.forEach((c, j) => pastille(...c[0], j + 1));
+  points.forEach((q) => pastille(q.cx * e, q.cy * e, chemins.length + 1));
+  ctx.restore();
 }
 
 // Eau : la peinture vue à travers un liquide. Chaque contact lance une onde circulaire, et tout ondoie doucement
