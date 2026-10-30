@@ -1,5 +1,5 @@
-// Tracer les lettres au doigt (dès 4 ans) : la lettre en filigrane, le doigt la remplit d'une couleur lumineuse,
-// des étincelles suivent le doigt. Lettre recouverte aux 4/5 : bravo, son nom, lettre suivante.
+// Tracer les lettres au doigt (dès 4 ans) : la lettre en filigrane, le doigt la remplit d'une couleur lumineuse
+// qui ondule comme un liquide, des étincelles suivent le doigt. Lettre recouverte aux 4/5 : bravo, son nom, lettre suivante.
 // ponytail: on mesure la surface recouverte, pas le sens du tracé ; un ordre des traits demanderait un chemin dessiné par lettre.
 import { MOTS } from './content.js';
 import { jouer, bip } from './audio.js';
@@ -19,7 +19,7 @@ export async function ecranTracer(app, i) {
       <span class="mascotte">🐆</span>
     </header>
     <section class="tracer">
-      <div class="toile"><canvas class="fond"></canvas><canvas class="peinture"></canvas><canvas class="etincelles"></canvas></div>
+      <div class="toile"><canvas class="fond"></canvas><canvas class="peinture"></canvas><canvas class="liquide"></canvas><canvas class="etincelles"></canvas></div>
       <nav class="fleches">
         <a class="rond" href="#/tracer/${i + 1}" aria-label="بعدی">←</a>
         <button class="rond effacer" aria-label="پاک کن">🧽</button>
@@ -31,12 +31,12 @@ export async function ecranTracer(app, i) {
   dire();
 
   const toile = app.querySelector('.toile');
-  const [fond, peinture, etincelles] = toile.querySelectorAll('canvas');
+  const [fond, peinture, eau, etincelles] = toile.querySelectorAll('canvas');
   const taille = Math.min(innerWidth - 32, innerHeight - 220, 640);
   const dpr = devicePixelRatio || 1;
   const W = Math.round(taille * dpr);
   toile.style.width = toile.style.height = taille + 'px';
-  for (const c of [fond, peinture, etincelles]) c.width = c.height = W;
+  for (const c of [fond, peinture, eau, etincelles]) c.width = c.height = W;
 
   await document.fonts.load('900 100px Vazirmatn', m.ecrit).catch(() => {});
   if (!toile.isConnected) return;
@@ -72,7 +72,11 @@ export async function ecranTracer(app, i) {
   mq.fillText(m.ecrit, x0, y0);
   mq.strokeText(m.ecrit, x0, y0);
   const url = `url(${masque.toDataURL()})`;
-  peinture.style.maskImage = peinture.style.webkitMaskImage = url;
+  // La peinture passe par l'eau (WebGL) si la tablette sait faire ; sinon on la montre telle quelle.
+  const vague = liquide(eau, peinture);
+  for (const c of [peinture, eau]) c.style.maskImage = c.style.webkitMaskImage = url;
+  if (vague) peinture.style.opacity = 0;
+  else eau.remove();
 
   // Mesure sur une petite grille : points de la lettre, et ce que le doigt a recouvert.
   const s = BASSE / W;
@@ -99,7 +103,7 @@ export async function ecranTracer(app, i) {
   p.lineCap = p.lineJoin = 'round';
   const e = etincelles.getContext('2d');
   const doigts = new Map();
-  let particules = [], teinte = Math.random() * 360, fini = false, boucle = 0;
+  let particules = [], teinte = Math.random() * 360, fini = false, boucle = 0, parcours = 0;
 
   const point = (ev) => {
     const r = peinture.getBoundingClientRect();
@@ -114,6 +118,11 @@ export async function ecranTracer(app, i) {
     p.beginPath(); p.moveTo(ax, ay); p.lineTo(bx, by); p.stroke();
     g.beginPath(); g.moveTo(ax * s, ay * s); g.lineTo(bx * s, by * s); g.stroke();
     for (let n = 0; n < 3; n++) etincelle(bx, by, 1);
+    if (vague) {
+      vague.sale = true;
+      parcours += Math.hypot(bx - ax, by - ay);
+      if (parcours > pinceau * 1.5 || ax === bx) { parcours = 0; vague.onde(bx / W, 1 - by / W); }
+    }
   };
   const etincelle = (x, y, force) => {
     const a = Math.random() * Math.PI * 2, v = (Math.random() * 4 + 1) * dpr * force;
@@ -138,7 +147,8 @@ export async function ecranTracer(app, i) {
       e.fillStyle = `hsl(${q.t} 100% 65% / ${q.vie})`;
       e.beginPath(); e.arc(q.x, q.y, q.r * q.vie + dpr, 0, Math.PI * 2); e.fill();
     }
-    boucle = doigts.size || particules.length ? requestAnimationFrame(animer) : 0;
+    const eauVive = vague?.dessiner();
+    boucle = doigts.size || particules.length || eauVive ? requestAnimationFrame(animer) : 0;
   };
   const relancer = () => { boucle ||= requestAnimationFrame(animer); };
 
@@ -147,6 +157,7 @@ export async function ecranTracer(app, i) {
     fini = true;
     bip(true);
     for (let n = 0; n < 120; n++) etincelle(W / 2 + (Math.random() - 0.5) * W * 0.5, W / 2 + (Math.random() - 0.5) * W * 0.5, 2);
+    for (let n = 0; n < 5; n++) vague?.onde(0.2 + Math.random() * 0.6, 0.2 + Math.random() * 0.6);
     relancer();
     app.querySelector('.mascotte').classList.add('saute');
     dire().then(() => setTimeout(() => { if (toile.isConnected) location.hash = `#/tracer/${i + 1}`; }, 800));
@@ -176,5 +187,73 @@ export async function ecranTracer(app, i) {
     p.clearRect(0, 0, W, W);
     g.clearRect(0, 0, BASSE, BASSE);
     fini = false;
+    if (vague) { vague.sale = true; relancer(); }
   });
+}
+
+// Eau : la peinture vue à travers un liquide. Chaque contact lance une onde circulaire, et tout ondoie doucement
+// tant qu'une onde vit. null si WebGL manque. ponytail: 8 ondes à la fois, les plus anciennes sont remplacées.
+function liquide(toile, source) {
+  const gl = toile.getContext('webgl', { premultipliedAlpha: true });
+  if (!gl) return null;
+  const shader = (type, code) => {
+    const s = gl.createShader(type);
+    gl.shaderSource(s, code);
+    gl.compileShader(s);
+    return s;
+  };
+  const prog = gl.createProgram();
+  gl.attachShader(prog, shader(gl.VERTEX_SHADER, `attribute vec2 a; varying vec2 uv;
+    void main() { uv = a * .5 + .5; gl_Position = vec4(a, 0., 1.); }`));
+  gl.attachShader(prog, shader(gl.FRAGMENT_SHADER, `precision mediump float;
+    uniform sampler2D img; uniform float t; uniform vec3 ondes[8]; varying vec2 uv;
+    void main() {
+      vec2 o = .004 * vec2(sin(uv.y * 14. + t * 2.), cos(uv.x * 14. + t * 1.6));
+      for (int i = 0; i < 8; i++) {
+        float age = t - ondes[i].z;
+        if (age < 0. || age > 2.5) continue;
+        vec2 d = uv - ondes[i].xy;
+        float r = length(d) + .0001;
+        o += d / r * sin(r * 45. - age * 14.) * exp(-r * 6.) * exp(-age * 1.6) * .025;
+      }
+      vec4 c = texture2D(img, uv + o);
+      c.r = texture2D(img, uv + o * 1.5).r;
+      c.b = texture2D(img, uv + o * .5).b;
+      gl_FragColor = c;
+    }`));
+  gl.linkProgram(prog);
+  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return null;
+  gl.useProgram(prog);
+  gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+  gl.enableVertexAttribArray(0);
+  gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+  gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+  gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
+  for (const [k, v] of [[gl.TEXTURE_MIN_FILTER, gl.LINEAR], [gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE]]) gl.texParameteri(gl.TEXTURE_2D, k, v);
+  const uT = gl.getUniformLocation(prog, 't'), uOndes = gl.getUniformLocation(prog, 'ondes');
+  const ondes = new Float32Array(24).fill(-100);
+  const t0 = performance.now();
+  const maintenant = () => (performance.now() - t0) / 1000;
+  let n = 0, derniere = -100;
+  return {
+    sale: true,
+    onde(x, y) {
+      derniere = maintenant();
+      ondes.set([x, y, derniere], (n++ % 8) * 3);
+    },
+    // Renvoie vrai tant que l'eau bouge encore.
+    dessiner() {
+      if (this.sale) {
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, source);
+        this.sale = false;
+      }
+      const t = maintenant();
+      gl.uniform1f(uT, t);
+      gl.uniform3fv(uOndes, ondes);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      return t - derniere < 2.5;
+    },
+  };
 }

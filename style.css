@@ -168,7 +168,8 @@ fieldset { border: 0; padding: 0; margin: 0; }
 .tracer { display: flex; flex-direction: column; align-items: center; gap: 20px; }
 .toile { position: relative; background: var(--carte); border: 3px solid var(--ligne); border-radius: 28px; touch-action: none; }
 .toile canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
-.toile .peinture { mask-size: 100% 100%; -webkit-mask-size: 100% 100%; touch-action: none; }
+.toile .peinture, .toile .liquide { mask-size: 100% 100%; -webkit-mask-size: 100% 100%; touch-action: none; }
+.toile .liquide { pointer-events: none; }
 .toile .etincelles { pointer-events: none; }
 .fleches { display: flex; gap: 24px; }
 .tracer-entree { background: var(--turquoise); border-color: var(--turquoise-fonce); box-shadow: 0 6px 0 var(--turquoise-fonce); color: #fff; text-decoration: none; }
