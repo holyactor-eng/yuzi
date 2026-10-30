@@ -39,7 +39,7 @@
 <p><button class="outil" id="copier">Copier les résultats</button> <button class="outil" id="testfichier">Auto-test (fichier du modèle)</button></p>
 <textarea id="export" readonly></textarea>
 
-<script src="vosk.js"></script>
+<script src="../vendor/vosk.js"></script>
 <script type="module">
 // Jetable : valide Vosk + modèle persan + grammaire restreinte avant de l'intégrer à یوزی.
 import { normaliser, decider } from '../parole.js';
@@ -145,7 +145,7 @@ $('copier').onclick = () => navigator.clipboard.writeText($('export').value);
 $('testfichier').onclick = autoTest;
 
 const t0 = performance.now();
-modele = await Vosk.createModel(new URL('model.tar.gz', location.href).href);
+modele = await Vosk.createModel(new URL("../vendor/model.tar.gz", location.href).href);
 modele.on('error', (m) => console.error(m));
 $('etat').textContent = `Modèle prêt en ${((performance.now() - t0) / 1000).toFixed(1)} s.`;
 window.modeleChargé = true;

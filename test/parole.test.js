@@ -19,7 +19,7 @@ test('decider : accepte le mot attendu, refuse un autre mot ou rien', () => {
   assert.equal(decider('[unk]', 'مامان'), false);
 });
 
-test('grammaire : mot attendu, proches, puis [unk]', () => {
-  const mots = { a: { parle: 'مامان', proches: ['b', 'c'] }, b: { parle: 'بابا' }, c: { parle: 'مامان‌بزرگ' } };
+test('grammaire : mot attendu d\'abord, tous les autres mots en leurres, puis [unk]', () => {
+  const mots = { b: { parle: 'بابا' }, a: { parle: 'مامان' }, c: { parle: 'مامان‌بزرگ' } };
   assert.deepEqual(grammaire('a', mots), ['مامان', 'بابا', 'مامان بزرگ', '[unk]']);
 });

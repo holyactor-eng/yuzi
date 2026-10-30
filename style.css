@@ -138,7 +138,8 @@ fieldset { border: 0; padding: 0; margin: 0; }
 @keyframes ecoute { 50% { transform: scale(1.08); } }
 .apres-micro { display: flex; gap: 16px; align-items: center; width: 100%; max-width: 440px; }
 .apres-micro .gros { flex: 1; }
-.apres-micro[hidden] { display: none; }
+.apres-micro[hidden], .apres-micro .moi[hidden] { display: none; }
+.micro:disabled { opacity: .6; }
 .haut-parleur.moi { width: 72px; height: 72px; flex: none; background: var(--carte); border-color: var(--ligne); box-shadow: 0 5px 0 var(--ligne); }
 
 /* Pied de leçon : retour juste/faux */

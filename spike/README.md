@@ -2,7 +2,7 @@
 
 But : savoir si Vosk + le modèle persan gratuit reconnaît les mots dits par les enfants, sur la tablette, sans internet une fois chargé.
 
-Fichiers lourds inclus : `vosk.js` (vosk-browser 0.0.8, Apache 2.0) et `model.tar.gz` (vosk-model-small-fa-0.42 d'Alpha Cephei, 53 Mo, Apache 2.0), plus `test.wav`, l'enregistrement de test livré avec le modèle.
+Fichiers lourds, partagés avec l'app dans `vendor/` : `vosk.js` (vosk-browser 0.0.8, Apache 2.0) et `model.tar.gz` (vosk-model-small-fa-0.42 d'Alpha Cephei, 53 Mo, Apache 2.0), plus `test.wav`, l'enregistrement de test livré avec le modèle.
 
 ## Tester sur la tablette Samsung
 

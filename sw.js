@@ -1,6 +1,6 @@
 // Hors ligne : on sert depuis le cache tout de suite et on le met à jour en arrière-plan.
-// Sons, polices et futurs fichiers de reconnaissance sont mis en cache au premier usage.
-const CACHE = 'yuzi-v2';
+// Sons, moteur et modèle de reconnaissance sont mis en cache au premier usage.
+const CACHE = 'yuzi-v3';
 const COQUILLE = [
   './', 'index.html', 'style.css', 'app.js', 'content.js', 'exercices.js', 'srs.js', 'progres.js', 'audio.js', 'parole.js',
   'manifest.webmanifest', 'icon.svg', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png',
@@ -19,14 +19,16 @@ self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET' || url.pathname.includes('/spike/')) return;
   e.respondWith(caches.open(CACHE).then(async (c) => {
     const garde = await c.match(e.request, { ignoreSearch: true });
-    const frais = fetch(e.request).then((r) => {
+    const frais = () => fetch(e.request).then((r) => {
       if (r.ok || r.type === 'opaque') c.put(e.request, r.clone());
       return r;
     });
+    // Moteur et modèle (53 Mo) ne changent pas : jamais retéléchargés en arrière-plan.
+    if (garde && url.pathname.includes('/vendor/')) return garde;
     if (garde) {
-      e.waitUntil(frais.catch(() => {}));
+      e.waitUntil(frais().catch(() => {}));
       return garde;
     }
-    return frais;
+    return frais();
   }));
 });

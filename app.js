@@ -3,6 +3,7 @@ import { genererLecon } from './exercices.js';
 import { apresReponse, dus, jourLocal } from './srs.js';
 import { apresLecon, serieActuelle, xpDuJour, OBJECTIF_XP, coeursDuJour, perdreCoeur, COEURS_MAX } from './progres.js';
 import { jouer, enregistrer, jouerBlob, bip } from './audio.js';
+import { chargerModele, ecouterMicro, grammaire, decider } from './parole.js';
 
 /* ---------- Textes de l'interface (tout en persan) ---------- */
 
@@ -144,6 +145,8 @@ function ecranLecon(p, idLecon) {
   const file = genererLecon(items, p.groupe, MOTS, { revisions });
   const avecCoeurs = p.groupe === 'grand' && p.coeurs;
   const etat = { file, i: 0, total: file.length, rates: new Set() };
+  // Chaque leçon a des « بگو » : on prépare la reconnaissance dès le début.
+  chargerModele();
 
   if (avecCoeurs && coeursDuJour(d.coeurs, jour) === 0) {
     h(`<section class="fin"><div class="mascotte grand">😴</div><h1>${UI.plusDeCoeurs}</h1><a class="gros" href="#/">${UI.ok}</a></section>`);
@@ -337,21 +340,26 @@ const EXERCICES = {
     }));
   },
 
-  // Dire le mot. ponytail: en attendant la reconnaissance (spike Vosk), l'enfant s'écoute puis valide lui-même.
+  // Dire le mot : la reconnaissance vocale (sur la tablette) valide. Deux ratés, ou pas de moteur, et l'enfant valide lui-même.
   dis(zone, e, repondre, dire) {
     zone.innerHTML = `<div class="enonce"><span class="emoji-grand">${MOTS[e.mot].emoji}</span>${hautParleur(e.mot)}</div>
-      <button class="micro" aria-label="${UI.parler}">🎤</button>
-      <div class="apres-micro" hidden>${bouton('haut-parleur moi', '👂', `aria-label="${UI.ecouterMoi}"`)}${bouton('gros', `✓ ${UI.jaiDit}`, 'data-ok')}</div>`;
+      <button class="micro" aria-label="${UI.parler}" disabled>⏳</button>
+      <div class="apres-micro" hidden>${bouton('haut-parleur moi', '👂', `aria-label="${UI.ecouterMoi}" hidden`)}${bouton('gros', `✓ ${UI.jaiDit}`, 'data-ok')}</div>`;
     brancherSons(zone);
     dire.then(() => ecouter(e.mot));
     const micro = zone.querySelector('.micro');
-    let rec = null, blob = null;
-    micro.addEventListener('click', async () => {
+    const moi = zone.querySelector('.moi');
+    const secours = () => { zone.querySelector('.apres-micro').hidden = false; };
+    let rec = null, blob = null, rates = 0;
+
+    // Sans moteur : l'enfant s'enregistre, se réécoute et valide.
+    const enregistrement = async () => {
       if (rec) {
         blob = await rec.stop();
         rec = null;
         micro.classList.remove('ecoute');
-        zone.querySelector('.apres-micro').hidden = false;
+        moi.hidden = false;
+        secours();
         return jouerBlob(blob);
       }
       try {
@@ -359,10 +367,30 @@ const EXERCICES = {
         micro.classList.add('ecoute');
       } catch {
         // Pas de micro : on ne bloque jamais l'enfant.
-        zone.querySelector('.apres-micro').hidden = false;
+        secours();
       }
+    };
+    const reconnaissance = async () => {
+      if (micro.classList.contains('ecoute')) return;
+      micro.classList.add('ecoute');
+      let entendu = '';
+      try { entendu = await ecouterMicro(grammaire(e.mot, MOTS)); } catch { secours(); }
+      micro.classList.remove('ecoute');
+      if (decider(entendu, MOTS[e.mot].parle)) return repondre(true);
+      bip(false);
+      micro.classList.add('secoue');
+      setTimeout(() => micro.classList.remove('secoue'), 400);
+      if (++rates >= 2) secours();
+      ecouter(e.mot);
+    };
+
+    chargerModele().then((m) => {
+      if (!zone.isConnected) return;
+      micro.textContent = '🎤';
+      micro.disabled = false;
+      micro.addEventListener('click', m ? reconnaissance : enregistrement);
     });
-    zone.querySelector('.moi').addEventListener('click', () => blob && jouerBlob(blob));
+    moi.addEventListener('click', () => blob && jouerBlob(blob));
     zone.querySelector('[data-ok]').addEventListener('click', () => repondre(true));
   },
 };
