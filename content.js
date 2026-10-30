@@ -3,10 +3,10 @@
 
 const m = (id, parle, ecrit, emoji, proches) => [id, { id, parle, ecrit, emoji, proches }];
 // Mots d'un même thème : les proches sont les 3 suivants du groupe (en boucle), donc de vrais leurres.
+// voix : texte donné à la voix IA quand l'écriture normale la fait mal prononcer.
 const groupe = (...mots) => mots.map(([id, parle, ecrit, emoji, extra], i) =>
   [id, { id, parle, ecrit, emoji, proches: [1, 2, 3].map((k) => mots[(i + k) % mots.length][0]), ...extra }]);
 // Lettre : on la voit telle quelle, on entend son nom. Les voyelles brèves guident la voix IA, la reconnaissance les ignore.
-// voix : texte donné à la voix IA quand le nom écrit la fait mal prononcer.
 const lettre = (id, nom, forme, extra) => ['l-' + id, nom, forme, forme, { lettre: true, ...extra }];
 
 export const MOTS = Object.fromEntries([
@@ -31,7 +31,7 @@ export const MOTS = Object.fromEntries([
   ...groupe(
     ['ghermez', 'قرمز', 'قرمز', '🔴'], ['abi', 'آبی', 'آبی', '🔵'], ['sabz', 'سبز', 'سبز', '🟢'],
     ['zard', 'زرد', 'زرد', '🟡'], ['narenji', 'نارنجی', 'نارنجی', '🟠'], ['banafsh', 'بنفش', 'بنفش', '🟣'],
-    ['siah', 'سیاه', 'سیاه', '⚫'], ['sefid', 'سفید', 'سفید', '⚪'], ['ghahvei', 'قهوه‌ای', 'قهوه‌ای', '🟤'],
+    ['siah', 'سیاه', 'سیاه', '⚫'], ['sefid', 'سفید', 'سفید', '⚪'], ['ghahvei', 'قهوه‌ای', 'قهوه‌ای', '🟤', { voix: 'قهوه‌یی' }],
   ),
   ...groupe(
     ['yek', 'یک', 'یک', '1️⃣'], ['do', 'دو', 'دو', '2️⃣'], ['seh', 'سه', 'سه', '3️⃣'], ['chahar', 'چهار', 'چهار', '4️⃣'],

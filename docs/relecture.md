@@ -41,7 +41,7 @@ Seul fichier en français. Corrige directement `content.js` (ou note ici) avant 
 | banafsh | بنفش | بنفش | 🟣 | violet |  |
 | siah | سیاه | سیاه | ⚫ | noir |  |
 | sefid | سفید | سفید | ⚪ | blanc |  |
-| ghahvei | قهوه‌ای | قهوه‌ای | 🟤 | marron |  |
+| ghahvei | قهوه‌ای | قهوه‌ای | 🟤 | marron | voix IA lancée avec « قهوه‌یی » (choisi à l'écoute) |
 
 ## Unité 4 : عددها
 
