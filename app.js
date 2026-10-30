@@ -4,6 +4,7 @@ import { apresReponse, dus, jourLocal } from './srs.js';
 import { apresLecon, serieActuelle, xpDuJour, OBJECTIF_XP, coeursDuJour, perdreCoeur, COEURS_MAX } from './progres.js';
 import { jouer, enregistrer, jouerBlob, bip, couper } from './audio.js';
 import { chargerModele, ecouterMicro, grammaire, decider } from './parole.js';
+import { ecranTracer } from './tracer.js';
 
 /* ---------- Textes de l'interface (tout en persan) ---------- */
 
@@ -31,6 +32,7 @@ const UI = {
   parler: 'حرف بزن',
   ecouterMoi: 'صدای خودم',
   jaiDit: 'گفتم',
+  tracer: 'بنویس با انگشت',
 };
 const AVATARS = ['🐆', '🦁', '🐼', '🦊', '🐰', '🐸', '🦄', '🐢', '🐧', '🦋'];
 const fa = (n) => n.toLocaleString('fa-IR');
@@ -60,6 +62,12 @@ function render() {
   if (route.startsWith('lecon/')) return ecranLecon(p, route.slice(6));
   if (route === 'autocollants') return ecranAutocollants(p);
   if (route === 'profils') return ecranProfils();
+  // Tracer : on reprend à la dernière lettre de cet enfant.
+  if (route === 'tracer') return ecranTracer(app, get('trace.' + p.id, 0));
+  if (route.startsWith('tracer/')) {
+    set('trace.' + p.id, Number(route.slice(7)) || 0);
+    return ecranTracer(app, Number(route.slice(7)) || 0);
+  }
   ecranChemin(p);
 }
 
@@ -115,6 +123,7 @@ function ecranChemin(p) {
       <a href="#/autocollants" class="badge" title="${UI.autocollants}">🎁 ${fa(d.autocollants.length)}</a>
     </header>
     <section class="chemin">
+      <a class="rond revision tracer-entree" href="#/tracer"><span>✍️</span><small>${UI.tracer}</small></a>
       ${aRevoir.length >= 3 ? `<a class="rond revision" href="#/lecon/revision"><span>🔁</span><small>${UI.revision}</small></a>` : ''}
       ${unitesPour(p).map((u) => `<div class="unite"><h2><span>${u.emoji}</span> ${esc(u.titre)}</h2>
         ${u.lecons.map((l) => {
