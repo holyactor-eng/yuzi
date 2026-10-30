@@ -135,17 +135,17 @@ export const CONSIGNES = {
 };
 
 // Matal : comptines populaires (anonymes, domaine public). Une ligne = un son audio/matal-<id>-<n>.mp3.
-// Les variantes changent d'une famille à l'autre : à relire par Afshin.
+// Voix : Afshin, enregistré puis coupé ligne à ligne aux silences (enregistrements/, hors git). tts.mjs ne les écrase pas.
 export const MATAL = [
   {
     id: 'atal', titre: 'اتل متل توتوله', emoji: '🐄',
     lignes: [['اتل متل توتوله', '🎵'], ['گاو حسن چه جوره', '🐄'], ['نه شیر داره نه پستون', '🥛'], ['شیرشو بردن هندستون', '🐘'],
-      ['یه زن کردی بستون', '👩'], ['اسمشو بذار عم قزی', '👧'], ['دور کلاش قرمزی', '👒'], ['هاچین و واچین', '✨'], ['یه پاتو ورچین', '🦶']],
+      ['یه زن کردی بستون', '👩'], ['اسمشو بذار عم قزی', '👧'], ['دور کلاش قرمزی', '👒'], ['هاچین و واچین، یه پاتو ورچین', '🦶']],
   },
   {
     id: 'amu', titre: 'عمو زنجیرباف', emoji: '⛓️',
     lignes: [['عمو زنجیرباف؟ بعله!', '👴'], ['زنجیر منو بافتی؟ بعله!', '⛓️'], ['پشت کوه انداختی؟ بعله!', '⛰️'], ['بابا اومده! چی چی آورده؟', '🎁'],
-      ['نخود و کشمش!', '🍇'], ['بخور و بیا!', '🏃']],
+      ['نخود و کشمش!', '🍇'], ['بخور و بیا!', '🏃'], ['با صدای چی؟', '🔔']],
   },
   {
     id: 'davidam', titre: 'دویدم و دویدم', emoji: '🏃',
