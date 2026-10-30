@@ -84,6 +84,7 @@ const IMAGE = { 'ا': 'asb', 'ب': 'bastani', 'پ': 'parande', 'ت': 'tokhmemorg
   'ض': 'zabt', 'ط': 'tavus', 'ظ': 'zarf', 'ع': 'eynak', 'غ': 'ghaza', 'ف': 'fil', 'ق': 'ghurbaghe', 'ک': 'kelid', 'گ': 'gorbe',
   'ل': 'lakposht', 'م': 'mahi', 'ن': 'nun', 'و': 'val', 'ھ': 'hendune', 'ی': 'yuz' };
 export const imageDe = (lettre) => MOTS[IMAGE[lettre]];
+export const IMAGES = Object.values(IMAGE);
 
 // gagner(emoji) : l'image du mot rejoint l'album de l'enfant.
 export async function ecranTracer(app, i, gagner = () => {}) {

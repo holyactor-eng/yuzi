@@ -98,7 +98,14 @@ fieldset { border: 0; padding: 0; margin: 0; }
 .rond.revision small { font-size: 1.125rem; font-weight: 900; }
 @keyframes pulse { 50% { box-shadow: 0 6px 0 var(--turquoise-fonce), 0 0 0 10px rgba(31, 165, 160, .18); } }
 
-.album { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 12px; font-size: 3rem; text-align: center; padding: 16px 0; }
+.album { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 12px; font-size: 3rem; text-align: center; padding: 8px 0 16px; }
+.album button { font: inherit; aspect-ratio: 1; border-radius: 20px; border: 3px solid var(--ligne); background: var(--carte); cursor: pointer; }
+.album .eu { box-shadow: 0 4px 0 var(--ligne); }
+.album .eu.saute { animation: saute .6s ease-in-out; }
+/* Case vide : l'ombre de l'image, pour donner envie de la gagner. */
+.album .vide { border-style: dashed; background: transparent; cursor: default; }
+.album .vide span { filter: brightness(0); opacity: .18; }
+.page-album { margin: 16px 0 0; font-size: 1.25rem; }
 
 /* Leçon */
 .barre-lecon { display: flex; align-items: center; gap: 14px; padding: 14px 0; }

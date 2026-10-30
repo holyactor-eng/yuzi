@@ -4,7 +4,7 @@ import { apresReponse, dus, jourLocal } from './srs.js';
 import { apresLecon, serieActuelle, xpDuJour, OBJECTIF_XP, coeursDuJour, perdreCoeur, COEURS_MAX } from './progres.js';
 import { jouer, enregistrer, jouerBlob, bip, couper } from './audio.js';
 import { chargerModele, ecouterMicro, grammaire, decider } from './parole.js';
-import { ecranTracer } from './tracer.js';
+import { ecranTracer, IMAGES } from './tracer.js';
 
 /* ---------- Textes de l'interface (tout en persan) ---------- */
 
@@ -141,10 +141,26 @@ function ecranChemin(p) {
     </section>`);
 }
 
+// Album : une page par unité, plus la page des lettres tracées. Les cases vides montrent l'ombre de l'image
+// à gagner ; toucher une image gagnée dit son mot.
 function ecranAutocollants(p) {
   const d = donnees(p.id);
-  h(`<header class="barre"><a href="#/" class="retour" aria-label="${UI.retour}">→</a><h1>${UI.autocollants}</h1></header>
-    <section class="album">${d.autocollants.map((a) => `<span>${a}</span>`).join('')}</section>`);
+  const pages = [
+    ...UNITES.filter((u) => u.id !== 'alphabet').map((u) => [u.titre, [...new Set(u.lecons.flatMap((l) => l.items))]]),
+    ['الفبا', IMAGES],
+  ];
+  const total = new Set(pages.flatMap(([, ids]) => ids.map((id) => MOTS[id].emoji)));
+  const eus = d.autocollants.filter((a) => total.has(a)).length;
+  h(`<header class="barre"><a href="#/" class="retour" aria-label="${UI.retour}">→</a><h1>${UI.autocollants}</h1>
+      <span class="badge">🎁 ${fa(eus)} / ${fa(total.size)}</span></header>
+    ${pages.map(([titre, ids]) => `<h2 class="page-album">${esc(titre)}</h2><section class="album">${ids.map((id) => {
+      const x = MOTS[id], a = d.autocollants.includes(x.emoji);
+      return `<button class="${a ? 'eu' : 'vide'}" data-id="${id}" ${a ? '' : 'disabled'} aria-label="${a ? esc(x.ecrit) : '?'}"><span>${x.emoji}</span></button>`;
+    }).join('')}</section>`).join('')}`);
+  app.querySelectorAll('.album .eu').forEach((b) => b.addEventListener('click', () => {
+    ecouter(b.dataset.id);
+    b.classList.remove('saute'); void b.offsetWidth; b.classList.add('saute');
+  }));
 }
 
 /* ---------- Leçon ---------- */
@@ -224,11 +240,10 @@ function ecranLecon(p, idLecon) {
     dd.progres = apresLecon(dd.progres, { jour, xp });
     for (const id of new Set(file.map((e) => e.mot))) dd.cartes[id] = apresReponse(dd.cartes[id], !etat.rates.has(id), jour);
     let nouveau = null;
-    if (!revision && !dd.lecons[idLecon]) {
-      dd.lecons[idLecon] = true;
-      nouveau = auHasard(lecon.items.filter((id) => !MOTS[id].lettre).map((id) => MOTS[id].emoji).filter((x) => !dd.autocollants.includes(x))) ?? null;
-      if (nouveau) dd.autocollants.push(nouveau);
-    }
+    if (!revision) dd.lecons[idLecon] = true;
+    // Chaque leçon finie (même rejouée) donne une image pas encore gagnée parmi ses mots, pour remplir l'album.
+    nouveau = auHasard([...new Set(file.map((e) => e.mot))].filter((id) => !MOTS[id].lettre).map((id) => MOTS[id].emoji).filter((x) => !dd.autocollants.includes(x))) ?? null;
+    if (nouveau) dd.autocollants.push(nouveau);
     garder(p.id, dd);
     h(`<section class="fin">
       <div class="mascotte grand saute">🐆</div>
