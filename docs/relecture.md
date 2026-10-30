@@ -71,7 +71,7 @@ Seul fichier en français. Corrige directement `content.js` (ou note ici) avant 
 | shir | شیر | شیر | 🦁 | lion | ici « lion » ; pas de « lait » pour éviter deux mots identiques |
 | fil | فیل | فیل | 🐘 | éléphant |  |
 | khargush | خرگوش | خرگوش | 🐰 | lapin |  |
-| yuz | یوزپلنگ | یوزپلنگ | 🐆 | guépard | clin d'œil au nom de l'app |
+| yuz | یوزپلنگ | یوزپلنگ | 🐆 | guépard | clin d'œil au nom de l'app ; voix IA « یوزِپَلَنگ » (2e essai, choisi à l'écoute) |
 
 ## Unité 6 : خوراکی‌ها
 
@@ -81,7 +81,7 @@ Seul fichier en français. Corrige directement `content.js` (ou note ici) avant 
 | nun | نون | نان | 🍞 | pain | même son que la lettre ن |
 | sib | سیب | سیب | 🍎 | pomme |  |
 | moz | موز | موز | 🍌 | banane | voix IA lancée avec « مُز » (choisi à l'écoute) |
-| berenj | برنج | برنج | 🍚 | riz |  |
+| berenj | برنج | برنج | 🍚 | riz | voix IA « بِرِنج » (2e essai, choisi à l'écoute) |
 | panir | پنیر | پنیر | 🧀 | fromage |  |
 | tokhmemorgh | تخم‌مرغ | تخم‌مرغ | 🥚 | œuf |  |
 | hendune | هندونه | هندوانه | 🍉 | pastèque | parlé ≠ écrit |
@@ -176,5 +176,5 @@ Seul fichier en français. Corrige directement `content.js` (ou note ici) avant 
 | l-mim | میم | م | la reconnaissance ne connaît pas میم : pas d'exercice « بگو » pour cette lettre |
 | l-nun | نون | ن |  |
 | l-vav | واو | و |  |
-| l-hedocheshm | هِه دو چشم | ه | nom complet pour ne pas confondre avec ح |
+| l-hedocheshm | هِه دو چشم | ه | nom complet pour ne pas confondre avec ح ; voix IA « هِه‌ی دو چشم » (2e essai, choisi à l'écoute) |
 | l-ye | یِه | ی |  |

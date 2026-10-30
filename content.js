@@ -41,11 +41,11 @@ export const MOTS = Object.fromEntries([
   ...groupe(
     ['gorbe', 'گربه', 'گربه', '🐱'], ['sag', 'سگ', 'سگ', '🐶', { voix: 'سَگ' }], ['mahi', 'ماهی', 'ماهی', '🐟'], ['parande', 'پرنده', 'پرنده', '🐦'],
     ['asb', 'اسب', 'اسب', '🐴'], ['gav', 'گاو', 'گاو', '🐮'], ['shir', 'شیر', 'شیر', '🦁'], ['fil', 'فیل', 'فیل', '🐘'],
-    ['khargush', 'خرگوش', 'خرگوش', '🐰'], ['yuz', 'یوزپلنگ', 'یوزپلنگ', '🐆'],
+    ['khargush', 'خرگوش', 'خرگوش', '🐰'], ['yuz', 'یوزپلنگ', 'یوزپلنگ', '🐆', { voix: 'یوزِپَلَنگ' }],
   ),
   ...groupe(
     ['ab', 'آب', 'آب', '💧'], ['nun', 'نون', 'نان', '🍞'], ['sib', 'سیب', 'سیب', '🍎'], ['moz', 'موز', 'موز', '🍌', { voix: 'مُز' }],
-    ['berenj', 'برنج', 'برنج', '🍚'], ['panir', 'پنیر', 'پنیر', '🧀'], ['tokhmemorgh', 'تخم‌مرغ', 'تخم‌مرغ', '🥚'],
+    ['berenj', 'برنج', 'برنج', '🍚', { voix: 'بِرِنج' }], ['panir', 'پنیر', 'پنیر', '🧀'], ['tokhmemorgh', 'تخم‌مرغ', 'تخم‌مرغ', '🥚'],
     ['hendune', 'هندونه', 'هندوانه', '🍉'], ['bastani', 'بستنی', 'بستنی', '🍦'], ['chai', 'چایی', 'چای', '🍵'],
   ),
   ...groupe(
@@ -75,7 +75,7 @@ export const MOTS = Object.fromEntries([
   ...groupe(lettre('sad', 'صاد', 'ص'), lettre('zad', 'زاد', 'ض'), lettre('ta', 'طا', 'ط'), lettre('za', 'ظا', 'ظ'), lettre('eyn', 'عین', 'ع'), lettre('gheyn', 'غین', 'غ')),
   ...groupe(lettre('fe', 'فِه', 'ف'), lettre('ghaf', 'قاف', 'ق'), lettre('kaf', 'کاف', 'ک'), lettre('gaf', 'گاف', 'گ'), lettre('lam', 'لام', 'ل')),
   // « میم » manque au vocabulaire de la reconnaissance, et « ته » y est pris pour « چه » : pas d'exercice « بگو » pour م ni ت.
-  ...groupe(lettre('mim', 'میم', 'م', { dire: false }), lettre('nun', 'نون', 'ن'), lettre('vav', 'واو', 'و'), lettre('hedocheshm', 'هِه دو چشم', 'ه'), lettre('ye', 'یِه', 'ی')),
+  ...groupe(lettre('mim', 'میم', 'م', { dire: false }), lettre('nun', 'نون', 'ن'), lettre('vav', 'واو', 'و'), lettre('hedocheshm', 'هِه دو چشم', 'ه', { voix: 'هِه‌ی دو چشم' }), lettre('ye', 'یِه', 'ی')),
 ]);
 
 // Trois leçons : 4 mots, 4 mots, puis les derniers mêlés à des mots déjà vus de l'unité (6 en tout).
