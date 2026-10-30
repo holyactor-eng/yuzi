@@ -16,6 +16,11 @@ export const garderVoix = (id, blob) => requete('readwrite', (s) => s.put(blob, 
 export const oublierVoix = (id) => requete('readwrite', (s) => s.delete(id));
 
 let enCours = null;
+// Coupe tout son de l'app : le micro ne doit jamais entendre la voix de la tablette.
+export function couper() {
+  enCours?.pause();
+  speechSynthesis.cancel();
+}
 function lireUrl(url) {
   enCours?.pause();
   const a = new Audio(url);

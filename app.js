@@ -2,7 +2,7 @@ import { MOTS, UNITES, CONSIGNES } from './content.js';
 import { genererLecon } from './exercices.js';
 import { apresReponse, dus, jourLocal } from './srs.js';
 import { apresLecon, serieActuelle, xpDuJour, OBJECTIF_XP, coeursDuJour, perdreCoeur, COEURS_MAX } from './progres.js';
-import { jouer, enregistrer, jouerBlob, bip } from './audio.js';
+import { jouer, enregistrer, jouerBlob, bip, couper } from './audio.js';
 import { chargerModele, ecouterMicro, grammaire, decider } from './parole.js';
 
 /* ---------- Textes de l'interface (tout en persan) ---------- */
@@ -346,8 +346,10 @@ const EXERCICES = {
       <button class="micro" aria-label="${UI.parler}" disabled>⏳</button>
       <div class="apres-micro" hidden>${bouton('haut-parleur moi', '👂', `aria-label="${UI.ecouterMoi}" hidden`)}${bouton('gros', `✓ ${UI.jaiDit}`, 'data-ok')}</div>`;
     brancherSons(zone);
-    dire.then(() => ecouter(e.mot));
+    // Le micro n'ouvre qu'une fois le mot fini : sinon il entend la tablette dire le mot et valide tout seul.
+    const modele = dire.then(() => ecouter(e.mot)).then(() => chargerModele());
     const micro = zone.querySelector('.micro');
+    const hp = zone.querySelector('.haut-parleur');
     const moi = zone.querySelector('.moi');
     const secours = () => { zone.querySelector('.apres-micro').hidden = false; };
     let rec = null, blob = null, rates = 0;
@@ -371,7 +373,9 @@ const EXERCICES = {
       }
     };
     const reconnaissance = async () => {
-      if (micro.classList.contains('ecoute')) return;
+      if (micro.disabled) return;
+      couper();
+      micro.disabled = hp.disabled = true;
       micro.classList.add('ecoute');
       let entendu = '';
       try { entendu = await ecouterMicro(grammaire(e.mot, MOTS)); } catch { secours(); }
@@ -381,10 +385,12 @@ const EXERCICES = {
       micro.classList.add('secoue');
       setTimeout(() => micro.classList.remove('secoue'), 400);
       if (++rates >= 2) secours();
-      ecouter(e.mot);
+      await new Promise((ok) => setTimeout(ok, 400));
+      await ecouter(e.mot);
+      micro.disabled = hp.disabled = false;
     };
 
-    chargerModele().then((m) => {
+    modele.then((m) => {
       if (!zone.isConnected) return;
       micro.textContent = '🎤';
       micro.disabled = false;
