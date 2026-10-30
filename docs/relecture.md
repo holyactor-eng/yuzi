@@ -94,7 +94,7 @@ Seul fichier en français. Corrige directement `content.js` (ou note ici) avant 
 |---|---|---|---|---|---|
 | cheshm | چشم | چشم | 👁️ | œil |  |
 | gush | گوش | گوش | 👂 | oreille | 👂 est aussi l'icône « réécouter ma voix » |
-| damagh | دماغ | بینی | 👃 | nez | écrit standard بینی ; garder دماغ aussi à l'écrit ? |
+| damagh | دماغ | بینی | 👃 | nez | écrit standard بینی ; garder دماغ aussi à l'écrit ? ; voix IA « دَماغ » (choisi à l'écoute) |
 | dahan | دهن | دهان | 👄 | bouche |  |
 | dast | دست | دست | ✋ | main |  |
 | pa | پا | پا | 🦶 | pied |  |
@@ -109,7 +109,7 @@ Seul fichier en français. Corrige directement `content.js` (ou note ici) avant 
 | dar | در | در | 🚪 | porte | در = porte, aussi « dans » |
 | panjere | پنجره | پنجره | 🪟 | fenêtre |  |
 | takht | تخت | تخت | 🛏️ | lit |  |
-| sandali | صندلی | صندلی | 🪑 | chaise |  |
+| sandali | صندلی | صندلی | 🪑 | chaise | voix IA « صَندَلی » (choisi à l'écoute) |
 | hammum | حموم | حمام | 🛁 | salle de bain |  |
 | kelid | کلید | کلید | 🔑 | clé |  |
 | cheragh | چراغ | چراغ | 💡 | lampe |  |
@@ -122,8 +122,8 @@ Seul fichier en français. Corrige directement `content.js` (ou note ici) avant 
 | bekhab | بخواب | بخواب | 😴 | dors |  |
 | bokhor | بخور | بخور | 🍴 | mange |  |
 | bedo | بدو | بدو | 🏃 | cours |  |
-| bepar | بپر | بپر | 🤸 | saute |  |
-| beraghs | برقص | برقص | 💃 | danse |  |
+| bepar | بپر | بپر | 🤸 | saute | voix IA « بِپَر » (choisi à l'écoute) |
+| beraghs | برقص | برقص | 💃 | danse | voix IA « بِرَقص » (choisi à l'écoute) |
 | bekhand | بخند | بخند | 😂 | ris |  |
 | bekhun | بخون | بخوان | 📖 | lis | بخون = lis, et aussi chante |
 | benevis | بنویس | بنویس | ✍️ | écris |  |
@@ -134,13 +134,13 @@ Seul fichier en français. Corrige directement `content.js` (ou note ici) avant 
 | id | parlé | écrit | emoji | sens | doute ? |
 |---|---|---|---|---|---|
 | dustetdaram | دوستت دارم | دوستت دارم | ❤️ | je t'aime |  |
-| goshname | گشنمه | گرسنه‌ام | 😋 | j'ai faim | forme parlée familière ; écrit گرسنه‌ام |
-| teshname | تشنمه | تشنه‌ام | 🥤 | j'ai soif | forme parlée familière ; écrit تشنه‌ام |
-| khaste | خسته‌ام | خسته‌ام | 🥱 | je suis fatigué | à l'oral خسته‌م ? la reconnaissance attend خسته‌ام |
+| goshname | گشنمه | گرسنه‌ام | 😋 | j'ai faim | forme parlée familière ; écrit گرسنه‌ام ; voix IA « گُشنمه » (choisi à l'écoute) |
+| teshname | تشنمه | تشنه‌ام | 🥤 | j'ai soif | forme parlée familière ; écrit تشنه‌ام ; voix IA « تِشنمه » (choisi à l'écoute) |
+| khaste | خسته‌ام | خسته‌ام | 🥱 | je suis fatigué | à l'oral خسته‌م ? la reconnaissance attend خسته‌ام ; voix IA « خسته‌م » (choisi à l'écoute) |
 | biainja | بیا اینجا | بیا اینجا | 👉 | viens ici |  |
 | komakam | کمکم کن | کمکم کن | 🆘 | aide-moi |  |
 | bebakhshid | ببخشید | ببخشید | 🙇 | pardon |  |
-| esmet | اسمت چیه؟ | اسم تو چیست؟ | 📛 | comment tu t'appelles ? | emoji 📛 peu parlant |
+| esmet | اسمت چیه؟ | اسم تو چیست؟ | 📛 | comment tu t'appelles ? | emoji 📛 peu parlant ; voix IA « اسمِت چیه؟ » (choisi à l'écoute) |
 
 ## Unité 11 : الفبا (8 ans et plus)
 
@@ -154,12 +154,12 @@ Seul fichier en français. Corrige directement `content.js` (ou note ici) avant 
 | l-jim | جیم | ج |  |
 | l-che | چِه | چ |  |
 | l-hejimi | حِه جیمی | ح | nom complet pour ne pas confondre avec ه |
-| l-khe | خِه | خ |  |
+| l-khe | خِه | خ | voix IA « خه » (2e essai, choisi à l'écoute) |
 | l-dal | دال | د |  |
 | l-zal | ذال | ذ |  |
 | l-re | رِه | ر |  |
-| l-ze | زِه | ز |  |
-| l-zhe | ژِه | ژ |  |
+| l-ze | زِه | ز | voix IA « زه » (2e essai, choisi à l'écoute) |
+| l-zhe | ژِه | ژ | voix IA « ژه » (choisi à l'écoute) |
 | l-sin | سین | س |  |
 | l-shin | شین | ش |  |
 | l-sad | صاد | ص |  |
