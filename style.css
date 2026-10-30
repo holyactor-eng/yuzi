@@ -141,12 +141,13 @@ fieldset { border: 0; padding: 0; margin: 0; }
 .effacer { font-size: 1.75rem; color: var(--doux); padding: 8px 12px; }
 
 .micro { width: 140px; height: 140px; border-radius: 50%; font-size: 4rem; background: var(--safran); border-color: var(--safran-fonce); box-shadow: 0 6px 0 var(--safran-fonce); }
-.micro.ecoute { background: var(--faux); border-color: #b23a37; box-shadow: 0 6px 0 #b23a37; animation: ecoute 1s ease-in-out infinite; }
+.micro.ecoute { background: var(--faux); border-color: #b23a37; box-shadow: 0 6px 0 #b23a37, 0 0 0 calc(var(--voix, 0) * 40px) rgb(218 0 0 / .25); transform: scale(calc(1 + var(--voix, 0) * .15)); transition: transform .08s, box-shadow .08s; }
+.entendu { min-height: 1.5em; margin: 8px 0 0; font-size: 1rem; opacity: .7; text-align: center; }
 @keyframes ecoute { 50% { transform: scale(1.08); } }
 .apres-micro { display: flex; gap: 16px; align-items: center; width: 100%; max-width: 440px; }
 .apres-micro .gros { flex: 1; }
 .apres-micro[hidden], .apres-micro .moi[hidden] { display: none; }
-.micro:disabled { opacity: .6; }
+.micro:disabled:not(.ecoute) { opacity: .6; }
 .haut-parleur.moi { width: 72px; height: 72px; flex: none; background: var(--carte); border-color: var(--ligne); box-shadow: 0 5px 0 var(--ligne); }
 
 /* Pied de leçon : retour juste/faux */

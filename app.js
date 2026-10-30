@@ -32,6 +32,8 @@ const UI = {
   nouvelAutocollant: 'برچسب تازه!',
   plusDeCoeurs: 'قلب‌ها تموم شد. فردا دوباره!',
   parler: 'حرف بزن',
+  silence: 'صدایی نشنیدم 🔇',
+  pasCompris: 'صدا را شنیدم ولی نفهمیدم',
   ecouterMoi: 'صدای خودم',
   jaiDit: 'گفتم',
   tracer: 'بنویس با انگشت',
@@ -463,6 +465,7 @@ const EXERCICES = {
   dis(zone, e, repondre, dire) {
     zone.innerHTML = `<div class="enonce"><span class="emoji-grand">${MOTS[e.mot].emoji}</span>${hautParleur(e.mot)}</div>
       <button class="micro" aria-label="${UI.parler}" disabled>⏳</button>
+      <p class="entendu" aria-live="polite"></p>
       <div class="apres-micro" hidden>${bouton('haut-parleur moi', '👂', `aria-label="${UI.ecouterMoi}" hidden`)}${bouton('gros', `✓ ${UI.jaiDit}`, 'data-ok')}</div>`;
     brancherSons(zone);
     // Le micro n'ouvre qu'une fois le mot fini : sinon il entend la tablette dire le mot et valide tout seul.
@@ -470,6 +473,7 @@ const EXERCICES = {
     const micro = zone.querySelector('.micro');
     const hp = zone.querySelector('.haut-parleur');
     const moi = zone.querySelector('.moi');
+    const entendu = zone.querySelector('.entendu');
     const secours = () => { zone.querySelector('.apres-micro').hidden = false; };
     let rec = null, blob = null, rates = 0;
 
@@ -495,11 +499,21 @@ const EXERCICES = {
       if (micro.disabled) return;
       couper();
       micro.disabled = hp.disabled = true;
-      micro.classList.add('ecoute');
-      let entendu = '';
-      try { entendu = await ecouterMicro(grammaire(e.mot, MOTS)); } catch { secours(); }
+      micro.textContent = '⏳';
+      entendu.textContent = '';
+      let r = { texte: '', niveau: 0 };
+      try {
+        // Le bouton devient rouge seulement quand le micro écoute vraiment, et gonfle avec la voix.
+        r = await ecouterMicro(grammaire(e.mot, MOTS), {
+          pret: () => { micro.textContent = '🎤'; micro.classList.add('ecoute'); },
+          niveau: (v) => micro.style.setProperty('--voix', v.toFixed(2)),
+        });
+      } catch { secours(); }
+      micro.textContent = '🎤';
       micro.classList.remove('ecoute');
-      if (decider(entendu, MOTS[e.mot].parle)) return repondre(true);
+      if (decider(r.texte, MOTS[e.mot].parle)) return repondre(true);
+      // Pour les parents : ce que la tablette a entendu (rien, un bruit, ou un autre mot).
+      entendu.textContent = r.niveau < 0.05 ? UI.silence : r.texte ? `«${r.texte}»` : UI.pasCompris;
       bip(false);
       micro.classList.add('secoue');
       setTimeout(() => micro.classList.remove('secoue'), 400);
