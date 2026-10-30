@@ -34,9 +34,9 @@ export const MOTS = Object.fromEntries([
     ['siah', 'سیاه', 'سیاه', '⚫'], ['sefid', 'سفید', 'سفید', '⚪'], ['ghahvei', 'قهوه‌ای', 'قهوه‌ای', '🟤', { voix: 'قهوه‌یی' }],
   ),
   ...groupe(
-    ['yek', 'یک', 'یک', '1️⃣'], ['do', 'دو', 'دو', '2️⃣'], ['seh', 'سه', 'سه', '3️⃣'], ['chahar', 'چهار', 'چهار', '4️⃣'],
-    ['panj', 'پنج', 'پنج', '5️⃣'], ['shish', 'شیش', 'شش', '6️⃣'], ['haft', 'هفت', 'هفت', '7️⃣'], ['hasht', 'هشت', 'هشت', '8️⃣'],
-    ['noh', 'نُه', 'نه', '9️⃣'], ['dah', 'ده', 'ده', '🔟'],
+    ['yek', 'یک', 'یک', '۱'], ['do', 'دو', 'دو', '۲'], ['seh', 'سه', 'سه', '۳'], ['chahar', 'چهار', 'چهار', '۴'],
+    ['panj', 'پنج', 'پنج', '۵'], ['shish', 'شیش', 'شش', '۶'], ['haft', 'هفت', 'هفت', '۷'], ['hasht', 'هشت', 'هشت', '۸'],
+    ['noh', 'نُه', 'نه', '۹'], ['dah', 'ده', 'ده', '۱۰'],
   ),
   ...groupe(
     ['gorbe', 'گربه', 'گربه', '🐱'], ['sag', 'سگ', 'سگ', '🐶'], ['mahi', 'ماهی', 'ماهی', '🐟'], ['parande', 'پرنده', 'پرنده', '🐦'],
@@ -101,7 +101,7 @@ export const UNITES = [
   },
   ...[
     ['couleurs', 'رنگ‌ها', '🎨', ['ghermez', 'abi', 'sabz', 'zard', 'narenji', 'banafsh', 'siah', 'sefid', 'ghahvei']],
-    ['chiffres', 'عددها', '🔢', ['yek', 'do', 'seh', 'chahar', 'panj', 'shish', 'haft', 'hasht', 'noh', 'dah']],
+    ['chiffres', 'عددها', '🧮', ['yek', 'do', 'seh', 'chahar', 'panj', 'shish', 'haft', 'hasht', 'noh', 'dah']],
     ['animaux', 'حیوان‌ها', '🐾', ['gorbe', 'sag', 'mahi', 'parande', 'asb', 'gav', 'shir', 'fil', 'khargush', 'yuz']],
     ['nourriture', 'خوراکی‌ها', '🍽️', ['ab', 'nun', 'sib', 'moz', 'berenj', 'panir', 'tokhmemorgh', 'hendune', 'bastani', 'chai']],
     ['corps', 'بدن', '🧍', ['cheshm', 'gush', 'damagh', 'dahan', 'dast', 'pa', 'dandun', 'zabun']],

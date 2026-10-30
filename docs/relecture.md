@@ -47,16 +47,16 @@ Seul fichier en français. Corrige directement `content.js` (ou note ici) avant 
 
 | id | parlé | écrit | emoji | sens | doute ? |
 |---|---|---|---|---|---|
-| yek | یک | یک | 1️⃣ | 1 |  |
-| do | دو | دو | 2️⃣ | 2 |  |
-| seh | سه | سه | 3️⃣ | 3 |  |
-| chahar | چهار | چهار | 4️⃣ | 4 | à Téhéran on dit souvent چار ; la voix IA dit چهار |
-| panj | پنج | پنج | 5️⃣ | 5 |  |
-| shish | شیش | شش | 6️⃣ | 6 | parlé ≠ écrit |
-| haft | هفت | هفت | 7️⃣ | 7 |  |
-| hasht | هشت | هشت | 8️⃣ | 8 |  |
-| noh | نُه | نه | 9️⃣ | 9 | même écriture que نه (non) : la reconnaissance ne peut pas les distinguer |
-| dah | ده | ده | 🔟 | 10 |  |
+| yek | یک | یک | ۱ | 1 |  |
+| do | دو | دو | ۲ | 2 |  |
+| seh | سه | سه | ۳ | 3 |  |
+| chahar | چهار | چهار | ۴ | 4 | à Téhéran on dit souvent چار ; la voix IA dit چهار |
+| panj | پنج | پنج | ۵ | 5 |  |
+| shish | شیش | شش | ۶ | 6 | parlé ≠ écrit |
+| haft | هفت | هفت | ۷ | 7 |  |
+| hasht | هشت | هشت | ۸ | 8 |  |
+| noh | نُه | نه | ۹ | 9 | même écriture que نه (non) : la reconnaissance ne peut pas les distinguer |
+| dah | ده | ده | ۱۰ | 10 |  |
 
 ## Unité 5 : حیوان‌ها
 
