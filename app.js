@@ -1,4 +1,4 @@
-import { MOTS, UNITES, CONSIGNES } from './content.js';
+import { MOTS, UNITES, CONSIGNES, MATAL } from './content.js';
 import { genererLecon } from './exercices.js';
 import { apresReponse, dus, jourLocal } from './srs.js';
 import { apresLecon, serieActuelle, xpDuJour, OBJECTIF_XP, coeursDuJour, perdreCoeur, COEURS_MAX } from './progres.js';
@@ -28,6 +28,7 @@ const UI = {
   revision: 'مرور',
   autocollants: 'برچسب‌ها',
   bagh: 'باغ من',
+  matal: 'متل‌ها',
   nouvelAutocollant: 'برچسب تازه!',
   plusDeCoeurs: 'قلب‌ها تموم شد. فردا دوباره!',
   parler: 'حرف بزن',
@@ -63,6 +64,8 @@ function render() {
   if (route.startsWith('lecon/')) return ecranLecon(p, route.slice(6));
   if (route === 'autocollants') return ecranAutocollants(p);
   if (route === 'bagh') return ecranBagh(p);
+  if (route === 'matal') return ecranMatals();
+  if (route.startsWith('matal/')) return ecranMatal(route.slice(6));
   if (route === 'profils') return ecranProfils();
   // Tracer : on reprend à la dernière lettre de cet enfant.
   const gagner = (x) => {
@@ -132,7 +135,10 @@ function ecranChemin(p) {
       <a href="#/bagh" class="badge" title="${UI.bagh}">🌷 ${fa(Object.keys(d.progres?.parJour ?? {}).length)}</a>
     </header>
     <section class="chemin">
-      <a class="rond revision tracer-entree" href="#/tracer"><span>✍️</span><small>${UI.tracer}</small></a>
+      <div class="entrees">
+        <a class="rond revision tracer-entree" href="#/tracer"><span>✍️</span><small>${UI.tracer}</small></a>
+        <a class="rond revision tracer-entree" href="#/matal"><span>🎶</span><small>${UI.matal}</small></a>
+      </div>
       ${aRevoir.length >= 3 ? `<a class="rond revision" href="#/lecon/revision"><span>🔁</span><small>${UI.revision}</small></a>` : ''}
       ${unitesPour(p).map((u) => `<div class="unite"><h2><span>${u.emoji}</span> ${esc(u.titre)}</h2>
         ${u.lecons.map((l) => {
@@ -187,6 +193,38 @@ function ecranBagh(p) {
     b.classList.remove('saute'); void b.offsetWidth; b.classList.add('saute');
     if (b.classList.contains('pousse')) location.hash = '#/';
   }));
+}
+
+// Matal : la liste des comptines, puis une comptine ligne à ligne. ▶️ lit tout en allumant chaque ligne ;
+// toucher une ligne la redit.
+function ecranMatals() {
+  h(`<header class="barre"><a href="#/" class="retour" aria-label="${UI.retour}">→</a><h1>${UI.matal}</h1></header>
+    <section class="matals">${MATAL.map((c) => `<a class="carte-matal" href="#/matal/${c.id}"><span>${c.emoji}</span>${esc(c.titre)}</a>`).join('')}</section>`);
+}
+
+function ecranMatal(id) {
+  const c = MATAL.find((x) => x.id === id);
+  if (!c) return (location.hash = '#/matal');
+  h(`<header class="barre"><a href="#/matal" class="retour" aria-label="${UI.retour}">→</a><h1>${esc(c.titre)}</h1>
+      <button class="haut-parleur jouer-tout" aria-label="▶️">▶️</button></header>
+    <section class="matal">${c.lignes.map(([t, e], n) => `<button class="ligne" data-n="${n}"><span>${e}</span>${esc(t)}</button>`).join('')}</section>
+    <div class="mascotte grand">🐆</div>`);
+  const lignes = [...app.querySelectorAll('.ligne')];
+  const dire = (n) => {
+    lignes.forEach((l, k) => l.classList.toggle('active', k === n));
+    lignes[n].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    return jouer(`matal-${id}-${n}`, c.lignes[n][0]).finally(() => lignes[n].classList.remove('active'));
+  };
+  let tour = 0; // un nouveau ▶️ ou une ligne touchée arrête la lecture en cours
+  const toutDire = async () => {
+    const moi = ++tour;
+    app.querySelector('.mascotte').classList.add('danse');
+    for (let n = 0; n < lignes.length && moi === tour && lignes[0].isConnected; n++) await dire(n);
+    app.querySelector('.mascotte')?.classList.remove('danse');
+  };
+  app.querySelector('.jouer-tout').addEventListener('click', () => { couper(); toutDire(); });
+  lignes.forEach((l, n) => l.addEventListener('click', () => { tour++; couper(); dire(n); }));
+  toutDire();
 }
 
 /* ---------- Leçon ---------- */

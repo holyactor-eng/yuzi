@@ -199,3 +199,17 @@ fieldset { border: 0; padding: 0; margin: 0; }
 .bagh .pousse { animation: saute 1.6s ease-in-out infinite; }
 @keyframes pousser { from { transform: scale(0) translateY(40px); } }
 .bagh .mascotte { position: absolute; left: 16px; bottom: 8px; font-size: 3.5rem; }
+/* Entrées de l'accueil côte à côte ; les comptines en safran. */
+.entrees { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
+.entrees a[href="#/matal"] { background: var(--safran); border-color: var(--safran-fonce); box-shadow: 0 6px 0 var(--safran-fonce); }
+/* Comptines : grandes cartes, puis lignes qui s'allument pendant la lecture. */
+.matals { display: grid; gap: 16px; padding: 16px 0; }
+.carte-matal { display: flex; align-items: center; gap: 16px; padding: 16px 20px; border-radius: 24px; background: var(--carte); border: 3px solid var(--ligne); box-shadow: 0 5px 0 var(--ligne); font-size: 1.5rem; font-weight: 900; color: var(--encre); text-decoration: none; }
+.carte-matal span { font-size: 3rem; }
+.matal { display: grid; gap: 10px; padding: 12px 0 96px; }
+.matal .ligne { display: flex; align-items: center; gap: 14px; text-align: start; font: inherit; font-size: 1.5rem; font-weight: 700; padding: 12px 16px; border-radius: 20px; border: 3px solid transparent; background: var(--carte); color: var(--encre); cursor: pointer; transition: transform .2s, background .2s; }
+.matal .ligne span { font-size: 2rem; }
+.matal .ligne.active { background: var(--safran); border-color: var(--safran-fonce); color: #fff; transform: scale(1.04); }
+.matal .ligne.active span { animation: saute .6s ease-in-out infinite; display: inline-block; }
+.mascotte.danse { animation: saute .7s ease-in-out infinite; }
+main > .mascotte.grand, #app > .mascotte.grand { position: fixed; left: 16px; bottom: 16px; }
