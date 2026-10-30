@@ -1,4 +1,5 @@
 {
+  "id": "./",
   "name": "یوزی",
   "short_name": "یوزی",
   "lang": "fa",
@@ -8,6 +9,10 @@
   "display": "standalone",
   "orientation": "any",
   "background_color": "#fff8ec",
-  "theme_color": "#fff8ec",
-  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+  "theme_color": "#f2a71b",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
 }

@@ -1,2 +1,4 @@
 .DS_Store
-spike/
+spike/vosk.js
+spike/model.tar.gz
+spike/vosk-model-small-fa-*/

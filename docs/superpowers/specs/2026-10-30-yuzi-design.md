@@ -29,12 +29,12 @@ Mes choix (à contester) :
 
 Choix : **Vosk dans le navigateur** (`vosk-browser`, Apache 2.0) + modèle persan `vosk-model-small-fa` (~50 Mo, Apache 2.0).
 - Gratuit, **hors ligne**, la voix des enfants ne quitte pas la tablette.
-- Marche sur Safari iPad (WebAssembly), contrairement à la dictée du navigateur.
+- Marche dans Chrome sur la tablette Samsung (Android, WebAssembly). La dictée de Chrome existe en persan, mais envoie la voix des enfants chez Google et exige internet.
 - **Grammaire restreinte** : on ne demande au moteur que de choisir entre le mot attendu et quelques mots proches. Beaucoup plus fiable qu'une transcription libre, surtout avec des voix d'enfants.
 - Indulgence : 3 essais ; après 3 échecs, l'exercice passe quand même (pas de blocage), le mot repart en révision. Bouton parent « ✓ » discret pour valider à la main.
 - Fichiers vendus dans `vendor/` et mis en cache par le service worker (pas de CDN à l'exécution).
 
-Écarté : dictée du navigateur (Chrome envoie la voix à Google et le persan est incertain sur Safari iPad) ; Whisper dans le navigateur (lourd, lent sur tablette, moins fiable sur mots isolés).
+Écarté : dictée du navigateur (Chrome envoie la voix à Google) ; Whisper dans le navigateur (lourd, lent sur tablette, moins fiable sur mots isolés).
 
 **Étape 0 obligatoire : spike jetable** pour tester Vosk persan sur la tablette réelle avec les voix des enfants (10 mots). Si le taux de réussite est mauvais, repli : l'enfant s'enregistre et se réécoute à côté du modèle, validation par le parent.
 

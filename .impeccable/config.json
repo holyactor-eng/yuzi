@@ -1,0 +1,26 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "flat-type-hierarchy",
+        "value": "*",
+        "files": [
+          "spike/index.html"
+        ],
+        "createdAt": "2026-10-30T11:02:25.182Z",
+        "reason": "Claude: throwaway spike test page for the parent, never shipped to children"
+      },
+      {
+        "rule": "cream-palette",
+        "value": "*",
+        "files": [
+          "spike/index.html"
+        ],
+        "createdAt": "2026-10-30T11:02:25.209Z",
+        "reason": "Claude: throwaway spike page reusing yuzi's chosen saffron/turquoise-on-cream palette, never shipped"
+      }
+    ]
+  }
+}

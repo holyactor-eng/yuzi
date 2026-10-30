@@ -374,5 +374,8 @@ const EXERCICES = {
   },
 };
 
+// Hors ligne et installation comme une vraie app.
+navigator.serviceWorker?.register('sw.js');
+
 addEventListener('hashchange', render);
 render();
