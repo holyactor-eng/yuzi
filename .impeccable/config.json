@@ -20,6 +20,15 @@
         ],
         "createdAt": "2026-10-30T11:02:25.209Z",
         "reason": "Claude: throwaway spike page reusing yuzi's chosen saffron/turquoise-on-cream palette, never shipped"
+      },
+      {
+        "rule": "cream-palette",
+        "value": "*",
+        "files": [
+          "docs/revue-audio.html"
+        ],
+        "createdAt": "2026-10-30T13:59:16.204Z",
+        "reason": "matches یوزی's own palette (#fff8ec etc. from style.css), not a generic AI default; internal dev review tool"
       }
     ]
   }
