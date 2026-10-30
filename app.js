@@ -1,4 +1,4 @@
-import { MOTS, UNITES } from './content.js';
+import { MOTS, UNITES, CONSIGNES } from './content.js';
 import { genererLecon } from './exercices.js';
 import { apresReponse, dus, jourLocal } from './srs.js';
 import { apresLecon, serieActuelle, xpDuJour, OBJECTIF_XP, coeursDuJour, perdreCoeur, COEURS_MAX } from './progres.js';
@@ -15,14 +15,7 @@ const UI = {
   avatar: 'عکس',
   ok: 'باشه',
   retour: 'برگشت',
-  consignes: {
-    ecoute: 'گوش کن و انتخاب کن',
-    lis: 'بخون و انتخاب کن',
-    paires: 'جفت‌ها رو پیدا کن',
-    blocs: 'جمله رو بساز',
-    ecris: 'بنویس',
-    dis: 'بگو',
-  },
+  consignes: CONSIGNES,
   bravo: ['آفرین!', 'عالیه!', 'ایول!', 'دمت گرم!'],
   encore: 'دوباره امتحان کن',
   reponse: 'جواب درست',

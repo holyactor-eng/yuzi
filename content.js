@@ -42,3 +42,13 @@ export const UNITES = [
     ],
   },
 ];
+
+// Consignes dites par le guépard (audio ui-<type>).
+export const CONSIGNES = {
+  ecoute: 'گوش کن و انتخاب کن',
+  lis: 'بخون و انتخاب کن',
+  paires: 'جفت‌ها رو پیدا کن',
+  blocs: 'جمله رو بساز',
+  ecris: 'بنویس',
+  dis: 'بگو',
+};
