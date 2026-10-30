@@ -176,5 +176,5 @@ Seul fichier en français. Corrige directement `content.js` (ou note ici) avant 
 | l-mim | میم | م | la reconnaissance ne connaît pas میم : pas d'exercice « بگو » pour cette lettre |
 | l-nun | نون | ن |  |
 | l-vav | واو | و |  |
-| l-hedocheshm | هِه دو چشم | ه | nom complet pour ne pas confondre avec ح ; voix IA « هِه‌ی دو چشم » (2e essai, choisi à l'écoute) |
+| l-hedocheshm | هِه دو چشم | ھ | nom complet pour ne pas confondre avec ح ; voix IA « هِه‌ی دو چشم » (2e essai, choisi à l'écoute) |
 | l-ye | یِه | ی |  |

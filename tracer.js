@@ -29,7 +29,7 @@ const TRAITS = {
   'م': [[[.45, .45], [.55, .15], [.8, .03], [.97, .25], [.85, .52], [.5, .55], [.25, .45], [.15, .6], [.15, .97]]],
   'ن': [[[.92, .06], [.92, .55], [.7, .92], [.3, .92], [.08, .55], [.08, .1]]],
   'و': [[[.5, .5], [.15, .35], [.3, .05], [.7, .05], [.9, .35], [.85, .7], [.5, .85], [.05, .92]]],
-  'ه': [[[.4, .05], [.12, .5], [.25, .9], [.7, .92], [.92, .6], [.7, .35], [.4, .05]]],
+  'ھ': [[[.48, .05], [.25, .35], [.2, .65], [.35, .8], [.55, .65], [.6, .35], [.8, .3], [.95, .5], [.9, .8], [.6, .92], [.3, .88], [.02, .85]]],
   'ی': [[[.95, .1], [.65, .15], [.6, .4], [.9, .6], [.75, .9], [.4, .95], [.12, .75], [.1, .2]]],
 };
 const FAMILLE = { 'پ': 'ب', 'ت': 'ب', 'ث': 'ب', 'ج': 'ح', 'چ': 'ح', 'خ': 'ح', 'ذ': 'د', 'ز': 'ر', 'ژ': 'ر', 'ش': 'س', 'ض': 'ص', 'ظ': 'ط', 'غ': 'ع' };
@@ -252,7 +252,8 @@ export async function ecranTracer(app, i) {
   });
 }
 
-// Le chemin à suivre, sous la peinture : pastille verte numérotée au départ, pointillés et flèches orange,
+// Le chemin à suivre, sous la peinture, fin et pâle pour que la lettre reste lisible : pastille verte numérotée
+// au départ, pointillés et petites flèches orange,
 // puis une pastille par point à poser. Les morceaux sont en coordonnées de la grille, `e` les ramène à la toile.
 function guider(ctx, traits = [], parts, e, pinceau) {
   if (!parts.length) return;
@@ -261,9 +262,10 @@ function guider(ctx, traits = [], parts, e, pinceau) {
   const chemins = traits.map((t) => lisser(t.map(([u, v]) => [bx + u * bw, by + v * bh])));
   const touche = (q) => chemins.some((c) => c.some(([x, y]) => x >= q.x0 * e && x <= (q.x1 + 1) * e && y >= q.y0 * e && y <= (q.y1 + 1) * e));
   const points = parts.filter((q) => q !== corps && !touche(q)).sort((a, b) => b.cx - a.cx);
-  const r = pinceau * 0.36;
+  const r = pinceau * 0.22;
   const pastille = (x, y, n) => {
     ctx.setLineDash([]);
+    ctx.globalAlpha = 0.7;
     ctx.fillStyle = '#2bb673';
     ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = '#fff';
@@ -280,16 +282,17 @@ function guider(ctx, traits = [], parts, e, pinceau) {
   ctx.lineCap = ctx.lineJoin = 'round';
   chemins.forEach((c) => {
     ctx.strokeStyle = ctx.fillStyle = '#ff8a1f';
-    ctx.lineWidth = pinceau * 0.09;
-    ctx.setLineDash([pinceau * 0.22, pinceau * 0.22]);
+    ctx.globalAlpha = 0.45;
+    ctx.lineWidth = pinceau * 0.05;
+    ctx.setLineDash([pinceau * 0.12, pinceau * 0.2]);
     ctx.beginPath(); c.forEach(([x, y], j) => (j ? ctx.lineTo(x, y) : ctx.moveTo(x, y))); ctx.stroke();
-    // Une flèche tous les ~2 pinceaux, et une au bout.
-    let reste = pinceau * 1.6;
+    // Une flèche tous les ~3 pinceaux, et une au bout.
+    let reste = pinceau * 2;
     for (let j = 1; j < c.length; j++) {
       const [ax, ay] = c[j - 1], [cx, cy] = c[j], l = Math.hypot(cx - ax, cy - ay);
       if ((reste -= l) > 0 && j < c.length - 1) continue;
-      reste = pinceau * 2;
-      fleche(cx, cy, Math.atan2(cy - ay, cx - ax), pinceau * 0.3);
+      reste = pinceau * 3;
+      fleche(cx, cy, Math.atan2(cy - ay, cx - ax), pinceau * 0.17);
     }
   });
   chemins.forEach((c, j) => pastille(...c[0], j + 1));

@@ -75,7 +75,7 @@ export const MOTS = Object.fromEntries([
   ...groupe(lettre('sad', 'صاد', 'ص'), lettre('zad', 'زاد', 'ض'), lettre('ta', 'طا', 'ط'), lettre('za', 'ظا', 'ظ'), lettre('eyn', 'عین', 'ع'), lettre('gheyn', 'غین', 'غ')),
   ...groupe(lettre('fe', 'فِه', 'ف'), lettre('ghaf', 'قاف', 'ق'), lettre('kaf', 'کاف', 'ک'), lettre('gaf', 'گاف', 'گ'), lettre('lam', 'لام', 'ل')),
   // « میم » manque au vocabulaire de la reconnaissance, et « ته » y est pris pour « چه » : pas d'exercice « بگو » pour م ni ت.
-  ...groupe(lettre('mim', 'میم', 'م', { dire: false }), lettre('nun', 'نون', 'ن'), lettre('vav', 'واو', 'و'), lettre('hedocheshm', 'هِه دو چشم', 'ه', { voix: 'هِه‌ی دو چشم' }), lettre('ye', 'یِه', 'ی')),
+  ...groupe(lettre('mim', 'میم', 'م', { dire: false }), lettre('nun', 'نون', 'ن'), lettre('vav', 'واو', 'و'), lettre('hedocheshm', 'هِه دو چشم', 'ھ', { voix: 'هِه‌ی دو چشم' }), lettre('ye', 'یِه', 'ی')),
 ]);
 
 // Trois leçons : 4 mots, 4 mots, puis les derniers mêlés à des mots déjà vus de l'unité (6 en tout).
