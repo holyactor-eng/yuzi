@@ -9,6 +9,15 @@ const LETTRES = Object.values(MOTS).filter((m) => m.lettre);
 const SEUIL = 0.8;
 const BASSE = 160; // résolution de la grille de mesure
 
+// Couleurs du drapeau iranien : la lettre peinte devient le drapeau (vert en haut, blanc, rouge en bas).
+const VERT = '#239f40', BLANC = '#ffffff', ROUGE = '#da0000';
+// Emblème officiel du drapeau (Wikimedia Commons, domaine public), cadre -1..1 ; la moitié gauche est le miroir.
+// Chaque morceau commence par M absolu : collés bout à bout, des m relatifs se décaleraient.
+const EMBLEME = ['M 1,6.5298e-4 c 0,0.2832 -0.1568,0.5432 -0.4072,0.6756 0.3408,-0.4264 0.2712,-1.0484 -0.1552,-1.3896 v 0 c -0.0144,-0.0116 -0.0292,-0.0228 -0.0444,-0.0336 0.3536,0.074 0.6068,0.386 0.6068,0.7476 z',
+  'M 0.6456,-0.03014702 c -4e-4,0.504 -0.4092,0.9124 -0.9132,0.912 -0.0956,0 -0.1904,-0.0152 -0.2812,-0.0444 0.016,8e-4 0.0324,0.0012 0.0484,0.0012 0.5524,0 1,-0.448 1,-1.0004 0,-0.1992 -0.0596,-0.394 -0.1712,-0.5592 0.202,0.1728 0.3176,0.4252 0.3172,0.6908 z',
+  'M 0.2576,-0.91334702 c 0,0.0768 -0.0624,0.1392 -0.1392,0.1392 -0.048,0 -0.0928,-0.0248 -0.118,-0.0656 l -0.0168,-0.0168 0.0164,-0.082 c 0.03,0.0652 0.1076,0.0936 0.1728,0.0636 0.038,-0.0176 0.0656,-0.0528 0.0732,-0.094 0.0076,0.0176 0.0116,0.0364 0.0116,0.0556 z',
+  'M 0.118,-0.68774702 c -0.0464,-0.0212 -0.0872,-0.0536 -0.118,-0.094 l -0.05,0.7816 L 0,1.000653 0.0776,0.89385298 l 0.0104,-0.2464 0.0108,-0.2564 0.0012,-0.0328 4e-4,-0.0124 0.0024,-0.0532 0.0068,-0.1616 0.0056,-0.1304 0.0016,-0.0376 0.002,-0.048 z'].join(' ');
+
 // Sens d'écriture : traits dessinés à la main sur Vazirmatn, dans la boîte du corps de la lettre (0..1, y vers le bas).
 // Les points (nuqte) sont trouvés tout seuls : ce sont les morceaux de la lettre qu'aucun trait ne traverse.
 const TRAITS = {
@@ -114,6 +123,9 @@ export async function ecranTracer(app, i) {
   const f = fond.getContext('2d');
   const [x0, y0, k] = dessinerLettre(f, W);
   const pinceau = 100 * k * 0.16;
+  const boite = f.measureText(m.ecrit);
+  const haut = y0 - boite.actualBoundingBoxAscent, bas = y0 + boite.actualBoundingBoxDescent;
+  const couleur = (y) => { const t = (y - haut) / (bas - haut); return t < 1 / 3 ? VERT : t < 2 / 3 ? BLANC : ROUGE; };
   f.fillStyle = '#efe4d2';
   f.fillText(m.ecrit, x0, y0);
   f.setLineDash([pinceau * 0.15, pinceau * 0.35]);
@@ -164,16 +176,18 @@ export async function ecranTracer(app, i) {
   p.lineCap = p.lineJoin = 'round';
   const e = etincelles.getContext('2d');
   const doigts = new Map();
-  let particules = [], teinte = Math.random() * 360, fini = false, boucle = 0, parcours = 0;
+  let particules = [], fini = false, boucle = 0, parcours = 0, embleme = null;
+  const drapeau = new Path2D(EMBLEME);
 
   const point = (ev) => {
     const r = peinture.getBoundingClientRect();
     return [((ev.clientX - r.left) / r.width) * W, ((ev.clientY - r.top) / r.height) * W];
   };
   const trait = ([ax, ay], [bx, by]) => {
-    teinte = (teinte + Math.hypot(bx - ax, by - ay) * 0.15) % 360;
-    const c = `hsl(${teinte} 95% 55%)`;
-    p.strokeStyle = p.shadowColor = c;
+    const c = couleur(by);
+    p.strokeStyle = c;
+    // Le blanc se perd sur la lettre beige : on l'entoure d'une ombre grise douce.
+    p.shadowColor = c === BLANC ? 'rgba(120,120,120,.55)' : c;
     p.shadowBlur = pinceau * 0.6;
     p.lineWidth = pinceau;
     p.beginPath(); p.moveTo(ax, ay); p.lineTo(bx, by); p.stroke();
@@ -187,7 +201,7 @@ export async function ecranTracer(app, i) {
   };
   const etincelle = (x, y, force) => {
     const a = Math.random() * Math.PI * 2, v = (Math.random() * 4 + 1) * dpr * force;
-    particules.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - dpr, vie: 1, t: teinte + Math.random() * 60, r: (Math.random() * 3 + 2) * dpr });
+    particules.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - dpr, vie: 1, c: [VERT, BLANC, ROUGE][(Math.random() * 3) | 0], r: (Math.random() * 3 + 2) * dpr });
   };
 
   // Étincelles et halo sous le doigt, image par image, tant qu'il y a quelque chose à montrer.
@@ -197,19 +211,37 @@ export async function ecranTracer(app, i) {
     e.globalCompositeOperation = 'lighter';
     for (const [x, y] of doigts.values()) {
       const halo = e.createRadialGradient(x, y, 0, x, y, pinceau * 1.4);
-      halo.addColorStop(0, `hsl(${teinte} 100% 75% / .9)`);
-      halo.addColorStop(1, `hsl(${teinte} 100% 60% / 0)`);
+      halo.addColorStop(0, couleur(y) + 'cc');
+      halo.addColorStop(1, couleur(y) + '00');
       e.fillStyle = halo;
       e.beginPath(); e.arc(x, y, pinceau * 1.4, 0, Math.PI * 2); e.fill();
     }
     particules = particules.filter((q) => (q.vie -= 0.025) > 0);
     for (const q of particules) {
       q.x += q.vx; q.y += q.vy; q.vy += 0.08 * dpr;
-      e.fillStyle = `hsl(${q.t} 100% 65% / ${q.vie})`;
+      e.globalAlpha = q.vie;
+      e.fillStyle = q.c;
       e.beginPath(); e.arc(q.x, q.y, q.r * q.vie + dpr, 0, Math.PI * 2); e.fill();
     }
+    e.globalAlpha = 1;
+    // Lettre finie : l'emblème rouge grandit au centre avec un éclat, puis s'efface.
+    if (embleme) {
+      const t = (performance.now() - embleme) / 1000;
+      if (t > 2.2) embleme = null;
+      else {
+        const z = W * 0.22 * Math.min(1, t * 3) * (1 + 0.08 * Math.sin(t * 9));
+        e.save();
+        e.globalCompositeOperation = 'source-over';
+        e.globalAlpha = Math.min(1, (2.2 - t) * 2);
+        e.translate(W / 2, W / 2);
+        e.shadowColor = '#fff'; e.shadowBlur = pinceau;
+        e.fillStyle = ROUGE;
+        e.scale(z, z); e.fill(drapeau); e.scale(-1, 1); e.fill(drapeau);
+        e.restore();
+      }
+    }
     const eauVive = vague?.dessiner();
-    boucle = doigts.size || particules.length || eauVive ? requestAnimationFrame(animer) : 0;
+    boucle = doigts.size || particules.length || eauVive || embleme ? requestAnimationFrame(animer) : 0;
   };
   const relancer = () => { boucle ||= requestAnimationFrame(animer); };
 
@@ -217,6 +249,7 @@ export async function ecranTracer(app, i) {
     if (fini || couverture() < SEUIL) return;
     fini = true;
     bip(true);
+    embleme = performance.now();
     for (let n = 0; n < 120; n++) etincelle(W / 2 + (Math.random() - 0.5) * W * 0.5, W / 2 + (Math.random() - 0.5) * W * 0.5, 2);
     for (let n = 0; n < 5; n++) vague?.onde(0.2 + Math.random() * 0.6, 0.2 + Math.random() * 0.6);
     relancer();
