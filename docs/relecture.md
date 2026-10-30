@@ -63,7 +63,7 @@ Seul fichier en français. Corrige directement `content.js` (ou note ici) avant 
 | id | parlé | écrit | emoji | sens | doute ? |
 |---|---|---|---|---|---|
 | gorbe | گربه | گربه | 🐱 | chat |  |
-| sag | سگ | سگ | 🐶 | chien |  |
+| sag | سگ | سگ | 🐶 | chien | voix IA lancée avec « سَگ » (choisi à l'écoute) |
 | mahi | ماهی | ماهی | 🐟 | poisson |  |
 | parande | پرنده | پرنده | 🐦 | oiseau |  |
 | asb | اسب | اسب | 🐴 | cheval |  |
