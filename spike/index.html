@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spike Vosk persan</title>
+<style>
+  body { font: 18px/1.5 -apple-system, system-ui, sans-serif; margin: 0 auto; max-width: 760px; padding: 16px; background: #fff8ec; color: #2b2118; }
+  h1 { font-size: 1.4rem; margin: 0 0 8px; }
+  #etat { padding: 8px 12px; border-radius: 10px; background: #fff; border: 2px solid #eadcc6; }
+  .mots { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; margin: 16px 0; }
+  .mot { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 12px; border-radius: 16px; background: #fff; border: 2px solid #eadcc6; font-size: 1rem; cursor: pointer; }
+  .mot b { font-size: 3rem; line-height: 1.1; }
+  .mot span { font-size: 1.6rem; direction: rtl; font-weight: 700; }
+  .mot small { color: #7a6a58; }
+  .mot.ecoute { border-color: #e2504c; background: #fde3e0; }
+  .mot.ok { border-color: #4caf50; }
+  .mot:disabled { opacity: .5; }
+  #live { min-height: 2em; font-size: 1.5rem; direction: rtl; text-align: center; }
+  table { width: 100%; border-collapse: collapse; background: #fff; }
+  td, th { border: 1px solid #eadcc6; padding: 4px 8px; }
+  td:nth-child(2) { direction: rtl; }
+  textarea { width: 100%; height: 140px; font: 14px monospace; }
+  button.outil { padding: 8px 14px; border-radius: 10px; border: 2px solid #1fa5a0; background: #fff; font: inherit; }
+  label { display: block; margin: 8px 0; }
+</style>
+</head>
+<body>
+<h1>Spike : reconnaissance vocale persane (Vosk, hors ligne)</h1>
+<p id="etat">Chargement du modèle (53 Mo, une seule fois)…</p>
+<label>Enfant : <input id="enfant" placeholder="prénom ou âge" size="12"></label>
+<label><input type="checkbox" id="libre"> Mode libre (sans grammaire, pour comparer)</label>
+<p>Touche une carte, dis le mot. L'écoute s'arrête seule après 2,5 s.</p>
+<div class="mots" id="mots"></div>
+<div id="live"></div>
+<h2>Résultats</h2>
+<table><thead><tr><th>Enfant</th><th>Mot</th><th>Entendu</th><th>OK</th></tr></thead><tbody id="journal"></tbody></table>
+<p id="score"></p>
+<p><button class="outil" id="copier">Copier les résultats</button> <button class="outil" id="testfichier">Auto-test (fichier du modèle)</button></p>
+<textarea id="export" readonly></textarea>
+
+<script src="vosk.js"></script>
+<script type="module">
+// Jetable : valide Vosk + modèle persan + grammaire restreinte avant de l'intégrer à یوزی.
+import { normaliser, decider } from '../parole.js';
+
+const MOTS = [
+  ['سلام', '🙋'], ['مامان', '👩'], ['بابا', '👨'], ['آب', '💧'], ['گربه', '🐱'],
+  ['سگ', '🐶'], ['سیب', '🍎'], ['قرمز', '🔴'], ['یک', '1️⃣'], ['دو', '2️⃣'],
+];
+const DUREE = 2500;
+const $ = (id) => document.getElementById(id);
+const resultats = [];
+let modele, ctx, flux;
+
+// Le mot attendu et 3 autres au hasard, plus « inconnu ».
+function grammaireDe(mot) {
+  const autres = MOTS.map(([m]) => m).filter((m) => m !== mot).sort(() => Math.random() - 0.5).slice(0, 3);
+  return [mot, ...autres, '[unk]'];
+}
+
+// Reconnaît un flux d'AudioBuffer. nourrir(rec) envoie l'audio puis résout quand c'est fini.
+function reconnaitre(sampleRate, grammaire, nourrir) {
+  return new Promise((ok) => {
+    const rec = grammaire ? new modele.KaldiRecognizer(sampleRate, JSON.stringify(grammaire)) : new modele.KaldiRecognizer(sampleRate);
+    const textes = [];
+    rec.on('partialresult', (m) => { $('live').textContent = m.result.partial; });
+    // Le worker traite l'audio en différé : on attend 1,5 s sans nouvel événement après la demande du résultat final.
+    let attente = null, fini = false;
+    const relancer = () => {
+      if (!fini) return;
+      clearTimeout(attente);
+      attente = setTimeout(() => { rec.remove(); ok(textes.join(' ').trim()); }, 1500);
+    };
+    rec.on('partialresult', relancer);
+    rec.on('result', (m) => { if (m.result.text) textes.push(m.result.text); relancer(); });
+    nourrir(rec).then(() => {
+      rec.retrieveFinalResult();
+      fini = true;
+      relancer();
+    });
+  });
+}
+
+async function micro() {
+  // Mobile : le contexte audio doit naître pendant le toucher, avant tout await.
+  ctx ??= new AudioContext();
+  flux ??= await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, channelCount: 1 } });
+}
+
+async function ecouter(bouton, mot) {
+  try { await micro(); } catch (e) { $('etat').textContent = 'Micro refusé : ' + e.message; return; }
+  await ctx.resume();
+  document.querySelectorAll('.mot').forEach((b) => (b.disabled = true));
+  bouton.classList.add('ecoute');
+  const grammaire = $('libre').checked ? null : grammaireDe(mot);
+  const entendu = await reconnaitre(ctx.sampleRate, grammaire, (rec) => new Promise((fini) => {
+    const source = ctx.createMediaStreamSource(flux);
+    const noeud = ctx.createScriptProcessor(4096, 1, 1);
+    noeud.onaudioprocess = (e) => { try { rec.acceptWaveform(e.inputBuffer); } catch (err) { console.error(err); } };
+    source.connect(noeud);
+    noeud.connect(ctx.destination);
+    setTimeout(() => { source.disconnect(); noeud.disconnect(); fini(); }, DUREE);
+  }));
+  bouton.classList.remove('ecoute');
+  document.querySelectorAll('.mot').forEach((b) => (b.disabled = false));
+  noter(mot, entendu, grammaire ? 'grammaire' : 'libre');
+}
+
+function noter(mot, entendu, mode) {
+  const ok = decider(entendu.replace('[unk]', '').trim(), mot) || (mode === 'libre' && normaliser(entendu).split(' ').includes(normaliser(mot)));
+  resultats.push({ enfant: $('enfant').value || '?', mot, entendu: entendu || '(rien)', ok, mode });
+  $('live').textContent = `${ok ? '✓' : '✗'} ${entendu || '(rien)'}`;
+  $('journal').insertAdjacentHTML('afterbegin', `<tr><td>${resultats.at(-1).enfant}</td><td>${mot}</td><td>${entendu || '(rien)'}</td><td>${ok ? '✓' : '✗'}</td></tr>`);
+  const n = resultats.filter((r) => r.mode === 'grammaire');
+  $('score').textContent = `Avec grammaire : ${n.filter((r) => r.ok).length}/${n.length} réussis.`;
+  $('export').value = resultats.map((r) => [r.enfant, r.mode, r.mot, r.entendu, r.ok ? 'OK' : 'NON'].join('\t')).join('\n');
+}
+
+// Auto-test sans micro : la phrase enregistrée livrée avec le modèle.
+async function autoTest() {
+  const attendu = 'من عرضه این کارو ندارم';
+  const brut = await (await fetch('test.wav')).arrayBuffer();
+  const audio = await new AudioContext().decodeAudioData(brut);
+  const envoyer = (rec) => {
+    const d = audio.getChannelData(0);
+    for (let i = 0; i < d.length; i += 4096) {
+      const morceau = new AudioBuffer({ length: Math.min(4096, d.length - i), sampleRate: audio.sampleRate, numberOfChannels: 1 });
+      morceau.copyToChannel(d.subarray(i, i + 4096), 0);
+      rec.acceptWaveform(morceau);
+    }
+    return Promise.resolve();
+  };
+  const libre = await reconnaitre(audio.sampleRate, null, envoyer);
+  const bonne = await reconnaitre(audio.sampleRate, [attendu, 'سلام', 'مامان', '[unk]'], envoyer);
+  const mauvaise = await reconnaitre(audio.sampleRate, ['سلام', 'مامان', 'بابا', '[unk]'], envoyer);
+  const r = { libre, bonne, mauvaise };
+  $('etat').textContent = `Auto-test : libre « ${libre} » · grammaire juste « ${bonne} » · grammaire sans la phrase « ${mauvaise} »`;
+  return r;
+}
+window.autoTest = autoTest;
+
+$('mots').innerHTML = MOTS.map(([m, e]) => `<button class="mot" data-mot="${m}" disabled><b>${e}</b><span>${m}</span></button>`).join('');
+$('copier').onclick = () => navigator.clipboard.writeText($('export').value);
+$('testfichier').onclick = autoTest;
+
+const t0 = performance.now();
+modele = await Vosk.createModel(new URL('model.tar.gz', location.href).href);
+modele.on('error', (m) => console.error(m));
+$('etat').textContent = `Modèle prêt en ${((performance.now() - t0) / 1000).toFixed(1)} s.`;
+window.modeleChargé = true;
+window.modele = modele;
+document.querySelectorAll('.mot').forEach((b) => {
+  b.disabled = false;
+  b.onclick = () => ecouter(b, b.dataset.mot);
+});
+</script>
+</body>
+</html>
