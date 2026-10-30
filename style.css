@@ -174,3 +174,9 @@ fieldset { border: 0; padding: 0; margin: 0; }
 .fleches { display: flex; gap: 24px; }
 .tracer-entree { background: var(--turquoise); border-color: var(--turquoise-fonce); box-shadow: 0 6px 0 var(--turquoise-fonce); color: #fff; text-decoration: none; }
 .fleches .rond { font-size: 2rem; text-decoration: none; color: var(--encre); }
+/* Lettre finie : l'image du mot jaillit au-dessus de la lettre. */
+.toile .vivant { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; pointer-events: none; animation: jaillir .6s cubic-bezier(.3, 1.6, .5, 1) both; }
+.toile .vivant span { font-size: min(38vw, 220px); line-height: 1; filter: drop-shadow(0 8px 16px rgb(0 0 0 / .2)); animation: saute .7s ease-in-out .6s 2; }
+.toile .vivant b { font-size: 2.5rem; font-weight: 900; background: #fffc; border-radius: 16px; padding: 0 16px; color: var(--encre); }
+.toile .vivant i { font-style: normal; color: #da0000; }
+@keyframes jaillir { from { transform: scale(.2); opacity: 0; } }

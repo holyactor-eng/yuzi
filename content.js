@@ -67,6 +67,11 @@ export const MOTS = Object.fromEntries([
     ['khaste', 'خسته‌ام', 'خسته‌ام', '🥱', { voix: 'خسته‌م' }], ['biainja', 'بیا اینجا', 'بیا اینجا', '👉'], ['komakam', 'کمکم کن', 'کمکم کن', '🆘'],
     ['bebakhshid', 'ببخشید', 'ببخشید', '🙇'], ['esmet', 'اسمت چیه؟', 'اسم تو چیست؟', '📛', { voix: 'اسمِت چیه؟' }],
   ),
+  // Mots-images du tracé : une lettre finie devient un mot qui commence par elle. Hors leçons.
+  ...groupe(['sanie', 'ثانیه', 'ثانیه', '⏱️'], ['jujeh', 'جوجه', 'جوجه', '🐥'], ['halazun', 'حلزون', 'حلزون', '🐌'], ['zorrat', 'ذرت', 'ذرت', '🌽'],
+    ['rubah', 'روباه', 'روباه', '🦊'], ['zanbur', 'زنبور', 'زنبور', '🐝'], ['zhele', 'ژله', 'ژله', '🍮'], ['zabt', 'ضبط صوت', 'ضبط صوت', '📻'],
+    ['tavus', 'طاووس', 'طاووس', '🦚'], ['zarf', 'ظرف', 'ظرف', '🥣'], ['eynak', 'عینک', 'عینک', '👓'], ['ghaza', 'غذا', 'غذا', '🍲'],
+    ['ghurbaghe', 'قورباغه', 'قورباغه', '🐸'], ['lakposht', 'لاک‌پشت', 'لاک‌پشت', '🐢'], ['val', 'وال', 'وال', '🐋']),
   // Alphabet : un groupe par leçon, lettres de forme voisine ensemble.
   ...groupe(lettre('alef', 'اَلِف', 'ا'), lettre('be', 'بِه', 'ب'), lettre('pe', 'پِه', 'پ'), lettre('te', 'تِه', 'ت', { dire: false }), lettre('se', 'ثِه', 'ث')),
   ...groupe(lettre('jim', 'جیم', 'ج'), lettre('che', 'چِه', 'چ'), lettre('hejimi', 'حِه جیمی', 'ح'), lettre('khe', 'خِه', 'خ', { voix: 'خه' }), lettre('dal', 'دال', 'د'), lettre('zal', 'ذال', 'ذ')),

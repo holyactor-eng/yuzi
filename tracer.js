@@ -78,7 +78,15 @@ function lisser(pts) {
 
 export const nbLettres = LETTRES.length;
 
-export async function ecranTracer(app, i) {
+// Lettre finie, elle prend vie : elle devient un mot qui commence par elle.
+const IMAGE = { 'ا': 'asb', 'ب': 'bastani', 'پ': 'parande', 'ت': 'tokhmemorgh', 'ث': 'sanie', 'ج': 'jujeh', 'چ': 'cheragh', 'ح': 'halazun',
+  'خ': 'khargush', 'د': 'dandun', 'ذ': 'zorrat', 'ر': 'rubah', 'ز': 'zanbur', 'ژ': 'zhele', 'س': 'sib', 'ش': 'shir', 'ص': 'sandali',
+  'ض': 'zabt', 'ط': 'tavus', 'ظ': 'zarf', 'ع': 'eynak', 'غ': 'ghaza', 'ف': 'fil', 'ق': 'ghurbaghe', 'ک': 'kelid', 'گ': 'gorbe',
+  'ل': 'lakposht', 'م': 'mahi', 'ن': 'nun', 'و': 'val', 'ھ': 'hendune', 'ی': 'yuz' };
+export const imageDe = (lettre) => MOTS[IMAGE[lettre]];
+
+// gagner(emoji) : l'image du mot rejoint l'album de l'enfant.
+export async function ecranTracer(app, i, gagner = () => {}) {
   const m = LETTRES[(i + LETTRES.length) % LETTRES.length];
   i = LETTRES.indexOf(m);
   app.innerHTML = `<header class="barre-lecon">
@@ -254,7 +262,19 @@ export async function ecranTracer(app, i) {
     for (let n = 0; n < 5; n++) vague?.onde(0.2 + Math.random() * 0.6, 0.2 + Math.random() * 0.6);
     relancer();
     app.querySelector('.mascotte').classList.add('saute');
-    dire().then(() => setTimeout(() => { if (toile.isConnected) location.hash = `#/tracer/${i + 1}`; }, 800));
+    const mot = imageDe(m.ecrit);
+    gagner(mot.emoji);
+    // Le nom de la lettre, puis l'image jaillit de la lettre avec son mot, puis lettre suivante.
+    dire()
+      .then(() => {
+        if (!toile.isConnected) return;
+        const v = document.createElement('div');
+        v.className = 'vivant';
+        v.innerHTML = `<span>${mot.emoji}</span><b><i>${m.ecrit === 'ھ' ? 'ه' : m.ecrit}</i>${mot.ecrit.slice(1)}</b>`;
+        toile.append(v);
+        return jouer(mot.id, mot.parle);
+      })
+      .then(() => setTimeout(() => { if (toile.isConnected) location.hash = `#/tracer/${i + 1}`; }, 1400));
   };
 
   peinture.addEventListener('pointerdown', (ev) => {

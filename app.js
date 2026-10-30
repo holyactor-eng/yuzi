@@ -63,10 +63,14 @@ function render() {
   if (route === 'autocollants') return ecranAutocollants(p);
   if (route === 'profils') return ecranProfils();
   // Tracer : on reprend à la dernière lettre de cet enfant.
-  if (route === 'tracer') return ecranTracer(app, get('trace.' + p.id, 0));
+  const gagner = (x) => {
+    const d = donnees(p.id);
+    if (!d.autocollants.includes(x)) { d.autocollants.push(x); garder(p.id, d); }
+  };
+  if (route === 'tracer') return ecranTracer(app, get('trace.' + p.id, 0), gagner);
   if (route.startsWith('tracer/')) {
     set('trace.' + p.id, Number(route.slice(7)) || 0);
-    return ecranTracer(app, Number(route.slice(7)) || 0);
+    return ecranTracer(app, Number(route.slice(7)) || 0, gagner);
   }
   ecranChemin(p);
 }
