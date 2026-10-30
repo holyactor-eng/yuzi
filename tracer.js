@@ -1,13 +1,14 @@
 // Tracer les lettres au doigt (dès 4 ans) : la lettre en filigrane, le doigt la remplit d'une couleur lumineuse
-// qui ondule comme un liquide, des étincelles suivent le doigt. Lettre recouverte aux 4/5 : bravo, son nom, lettre suivante.
-// Des flèches numérotées montrent le sens et l'ordre des traits, puis les points.
-// ponytail: on mesure la surface recouverte, pas le sens réel du doigt ; les flèches guident sans juger.
+// qui ondule comme un liquide, des étincelles suivent le doigt.
+// Des flèches numérotées montrent le sens et l'ordre des traits, puis les points. Le doigt doit suivre chaque trait
+// dans le sens des flèches et dans l'ordre (sinon : bip, la peinture de ce geste s'efface), puis toucher chaque
+// point. Tout est fait : bravo, son nom, lettre suivante. Une pastille qui pulse montre où reprendre.
 import { MOTS } from './content.js';
 import { jouer, bip } from './audio.js';
+import { mesurer, suivre, pointA } from './chemin.js';
 
 const LETTRES = Object.values(MOTS).filter((m) => m.lettre);
-const SEUIL = 0.8;
-const BASSE = 160; // résolution de la grille de mesure
+const BASSE = 160; // résolution de la grille de la forme
 
 // Couleurs du drapeau iranien : la lettre peinte devient le drapeau (vert en haut, blanc, rouge en bas).
 const VERT = '#239f40', BLANC = '#ffffff', ROUGE = '#da0000';
@@ -158,7 +159,7 @@ export async function ecranTracer(app, i, gagner = () => {}) {
   if (vague) peinture.style.opacity = 0;
   else eau.remove();
 
-  // Mesure sur une petite grille : points de la lettre, et ce que le doigt a recouvert.
+  // La forme sur une petite grille : ses morceaux (corps, points) et « le doigt est-il sur la lettre ? ».
   const s = BASSE / W;
   const grille = document.createElement('canvas');
   grille.width = grille.height = BASSE;
@@ -169,23 +170,36 @@ export async function ecranTracer(app, i, gagner = () => {}) {
   g.direction = 'ltr';
   g.fillText(m.ecrit, x0, y0);
   g.restore();
-  const cibles = [];
   const forme = g.getImageData(0, 0, BASSE, BASSE).data;
-  forme.forEach((v, j) => { if (j % 4 === 3 && v > 128) cibles.push(j); });
-  g.clearRect(0, 0, BASSE, BASSE);
-  guider(f, traitsDe(m.ecrit), morceaux(forme, BASSE), 1 / s, pinceau);
-  g.lineCap = g.lineJoin = 'round';
-  g.lineWidth = pinceau * s;
-  const couverture = () => {
-    const d = g.getImageData(0, 0, BASSE, BASSE).data;
-    return cibles.filter((j) => d[j] > 0).length / cibles.length;
+  const surLettre = (x, y) => forme[(Math.floor(y * s) * BASSE + Math.floor(x * s)) * 4 + 3] > 128;
+  const guide = guider(f, traitsDe(m.ecrit), morceaux(forme, BASSE), 1 / s, pinceau);
+  const traits = guide.chemins.map(mesurer);
+  const points = guide.points;
+  const T = pinceau * 1.3; // tolérance : un peu plus que la largeur du trait, pour les petits doigts
+  toile.guide = { traits, points, W }; // lisible depuis la console, pour tester le tracé au navigateur
+
+  // Où en est l'enfant : trait en cours, avancée sur ce trait, points touchés.
+  let etape = 0, avance = 0;
+  const touches = new Set();
+  const repere = document.createElement('div');
+  repere.className = 'repere';
+  toile.append(repere);
+  const placerRepere = () => {
+    const q = etape < traits.length ? pointA(traits[etape], avance) : (() => { const d = points.find((x) => !touches.has(x)); return d && [d.x, d.y]; })();
+    repere.hidden = !q;
+    if (q) { repere.style.left = (q[0] / W) * 100 + '%'; repere.style.top = (q[1] / W) * 100 + '%'; }
   };
+  placerRepere();
 
   const p = peinture.getContext('2d');
   p.lineCap = p.lineJoin = 'round';
   const e = etincelles.getContext('2d');
   const doigts = new Map();
   let particules = [], fini = false, boucle = 0, parcours = 0, embleme = null;
+  // Le geste en cours : la peinture et l'avancée d'avant, pour tout effacer si le geste est faux.
+  const avant = document.createElement('canvas');
+  avant.width = avant.height = W;
+  let geste = null;
   const drapeau = new Path2D(EMBLEME);
 
   const point = (ev) => {
@@ -200,7 +214,6 @@ export async function ecranTracer(app, i, gagner = () => {}) {
     p.shadowBlur = pinceau * 0.6;
     p.lineWidth = pinceau;
     p.beginPath(); p.moveTo(ax, ay); p.lineTo(bx, by); p.stroke();
-    g.beginPath(); g.moveTo(ax * s, ay * s); g.lineTo(bx * s, by * s); g.stroke();
     for (let n = 0; n < 3; n++) etincelle(bx, by, 1);
     if (vague) {
       vague.sale = true;
@@ -254,9 +267,61 @@ export async function ecranTracer(app, i, gagner = () => {}) {
   };
   const relancer = () => { boucle ||= requestAnimationFrame(animer); };
 
+  // Un faux geste (à rebours, ou ailleurs que là où il faut reprendre) : bip, on efface ce geste et on
+  // montre où reprendre. Le doigt ne peint plus jusqu'à ce qu'il se lève.
+  const refuser = () => {
+    geste.annule = true;
+    p.clearRect(0, 0, W, W);
+    p.drawImage(avant, 0, 0);
+    if (vague) vague.sale = true;
+    avance = geste.avance;
+    bip(false);
+    toile.classList.remove('secoue'); void toile.offsetWidth; toile.classList.add('secoue');
+    placerRepere();
+    repere.classList.remove('appel'); void repere.offsetWidth; repere.classList.add('appel');
+  };
+  // Juge un point du geste ; renvoie faux si le doigt ne doit plus peindre.
+  const juger = ([x, y]) => {
+    if (etape < traits.length) {
+      const pas = Math.hypot(x - geste.x, y - geste.y);
+      const r = suivre(traits[etape], { avance, pos: geste.pos }, [x, y], T, pas);
+      if (r.verdict === 'recul') return refuser(), false;
+      if (r.verdict === 'hors') {
+        // Un peu à côté, ça passe ; mais glisser ailleurs sur la lettre (autre bout, autre trait), non.
+        if (surLettre(x, y) && (geste.hors += pas) > pinceau * 2.5) return refuser(), false;
+      } else {
+        geste.hors = 0;
+        geste.pos = r.pos;
+        avance = r.avance;
+      }
+      geste.parcouru += pas;
+      geste.x = x; geste.y = y;
+      if (avance >= traits[etape].total - T) {
+        // Trait fini : petite fête, et ce geste s'arrête là (le suivant commence à sa pastille).
+        etape++; avance = 0;
+        for (let n = 0; n < 20; n++) etincelle(x, y, 1.5);
+        geste.annule = true;
+        placerRepere();
+        verifier();
+        return false;
+      }
+      return true;
+    }
+    for (const d of points) {
+      if (!touches.has(d) && Math.hypot(x - d.x, y - d.y) < Math.max(d.r, T * 0.6) + T * 0.4) {
+        touches.add(d);
+        for (let n = 0; n < 20; n++) etincelle(d.x, d.y, 1.5);
+        placerRepere();
+        verifier();
+      }
+    }
+    return true;
+  };
+
   const verifier = () => {
-    if (fini || couverture() < SEUIL) return;
+    if (fini || etape < traits.length || touches.size < points.length) return;
     fini = true;
+    repere.hidden = true;
     bip(true);
     embleme = performance.now();
     for (let n = 0; n < 120; n++) etincelle(W / 2 + (Math.random() - 0.5) * W * 0.5, W / 2 + (Math.random() - 0.5) * W * 0.5, 2);
@@ -278,29 +343,42 @@ export async function ecranTracer(app, i, gagner = () => {}) {
       .then(() => setTimeout(() => { if (toile.isConnected) location.hash = `#/tracer/${i + 1}`; }, 1400));
   };
 
+  // Un seul doigt à la fois : un second doigt sur la tablette est ignoré.
   peinture.addEventListener('pointerdown', (ev) => {
+    if (fini || doigts.size) return;
     peinture.setPointerCapture(ev.pointerId);
     const a = point(ev);
+    const c = avant.getContext('2d');
+    c.clearRect(0, 0, W, W);
+    c.drawImage(peinture, 0, 0);
+    geste = { avance, pos: avance, etape, hors: 0, parcouru: 0, x: a[0], y: a[1], annule: false };
     doigts.set(ev.pointerId, a);
-    trait(a, a);
+    if (juger(a)) trait(a, a);
     relancer();
   });
   peinture.addEventListener('pointermove', (ev) => {
     if (!doigts.has(ev.pointerId)) return;
     const lot = ev.getCoalescedEvents?.();
     for (const c of lot?.length ? lot : [ev]) {
+      if (geste.annule) break;
       const b = point(c);
-      trait(doigts.get(ev.pointerId), b);
+      if (juger(b)) trait(doigts.get(ev.pointerId), b);
       doigts.set(ev.pointerId, b);
     }
   });
-  const lever = (ev) => { doigts.delete(ev.pointerId); verifier(); };
+  // Un geste qui a glissé sur la lettre sans rien faire avancer (à rebours sur un trait court) est faux aussi.
+  const lever = (ev) => {
+    if (!doigts.delete(ev.pointerId)) return;
+    if (!geste.annule && etape === geste.etape && avance - geste.avance < pinceau && geste.parcouru > pinceau) refuser();
+  };
   peinture.addEventListener('pointerup', lever);
   peinture.addEventListener('pointercancel', lever);
 
   app.querySelector('.effacer').addEventListener('click', () => {
     p.clearRect(0, 0, W, W);
-    g.clearRect(0, 0, BASSE, BASSE);
+    etape = avance = 0;
+    touches.clear();
+    placerRepere();
     fini = false;
     if (vague) { vague.sale = true; relancer(); }
   });
@@ -309,8 +387,9 @@ export async function ecranTracer(app, i, gagner = () => {}) {
 // Le chemin à suivre, sous la peinture, fin et pâle pour que la lettre reste lisible : pastille verte numérotée
 // au départ, pointillés et petites flèches orange,
 // puis une pastille par point à poser. Les morceaux sont en coordonnées de la grille, `e` les ramène à la toile.
+// Renvoie les chemins (en coordonnées de la toile) et les points à toucher { x, y, r }.
 function guider(ctx, traits = [], parts, e, pinceau) {
-  if (!parts.length) return;
+  if (!parts.length) return { chemins: [], points: [] };
   const corps = parts.reduce((a, b) => (b.n > a.n ? b : a));
   const bx = corps.x0 * e, by = corps.y0 * e, bw = (corps.x1 - corps.x0 + 1) * e, bh = (corps.y1 - corps.y0 + 1) * e;
   const chemins = traits.map((t) => lisser(t.map(([u, v]) => [bx + u * bw, by + v * bh])));
@@ -352,6 +431,7 @@ function guider(ctx, traits = [], parts, e, pinceau) {
   chemins.forEach((c, j) => pastille(...c[0], j + 1));
   points.forEach((q) => pastille(q.cx * e, q.cy * e, chemins.length + 1));
   ctx.restore();
+  return { chemins, points: points.map((q) => ({ x: q.cx * e, y: q.cy * e, r: (Math.max(q.x1 - q.x0, q.y1 - q.y0) + 1) * e / 2 })) };
 }
 
 // Eau : la peinture vue à travers un liquide. Chaque contact lance une onde circulaire, et tout ondoie doucement
