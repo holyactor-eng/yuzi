@@ -1,4 +1,4 @@
-import { MOTS, UNITES, CONSIGNES, MATAL } from './content.js';
+import { MOTS, UNITES, CONSIGNES, MATAL, SORUD } from './content.js';
 import { genererLecon } from './exercices.js';
 import { apresReponse, dus, jourLocal } from './srs.js';
 import { apresLecon, serieActuelle, xpDuJour, OBJECTIF_XP, coeursDuJour, perdreCoeur, COEURS_MAX } from './progres.js';
@@ -65,6 +65,7 @@ function render() {
   if (route === 'autocollants') return ecranAutocollants(p);
   if (route === 'bagh') return ecranBagh(p);
   if (route === 'matal') return ecranMatals();
+  if (route === 'sorud') return ecranSorud();
   if (route.startsWith('matal/')) return ecranMatal(route.slice(6));
   if (route === 'profils') return ecranProfils();
   // Tracer : on reprend à la dernière lettre de cet enfant.
@@ -199,7 +200,7 @@ function ecranBagh(p) {
 // toucher une ligne la redit.
 function ecranMatals() {
   h(`<header class="barre"><a href="#/" class="retour" aria-label="${UI.retour}">→</a><h1>${UI.matal}</h1></header>
-    <section class="matals">${MATAL.map((c) => `<a class="carte-matal" href="#/matal/${c.id}"><span>${c.emoji}</span>${esc(c.titre)}</a>`).join('')}</section>`);
+    <section class="matals"><a class="carte-matal sorud" href="#/sorud"><span>${SORUD.emoji}</span>${SORUD.titre}</a>${MATAL.map((c) => `<a class="carte-matal" href="#/matal/${c.id}"><span>${c.emoji}</span>${esc(c.titre)}</a>`).join('')}</section>`);
 }
 
 function ecranMatal(id) {
@@ -225,6 +226,31 @@ function ecranMatal(id) {
   app.querySelector('.jouer-tout').addEventListener('click', () => { couper(); toutDire(); });
   lignes.forEach((l, n) => l.addEventListener('click', () => { tour++; couper(); dire(n); }));
   toutDire();
+}
+
+// Sorud : l'hymne joue, la ligne chantée s'allume (départs dans SORUD). ▶️ / ⏸️ ; toucher une ligne y saute.
+function ecranSorud() {
+  h(`<header class="barre"><a href="#/matal" class="retour" aria-label="${UI.retour}">→</a><h1>${SORUD.titre}</h1>
+      <button class="haut-parleur jouer-tout" aria-label="▶️">▶️</button></header>
+    <div class="drapeau-sorud">${SORUD.emoji}</div>
+    <section class="matal">${SORUD.lignes.map(([t], n) => `<button class="ligne" data-n="${n}">${esc(t)}</button>`).join('')}</section>`);
+  couper();
+  const son = new Audio('audio/sorud.mp3');
+  const bouton = app.querySelector('.jouer-tout');
+  const lignes = [...app.querySelectorAll('.ligne')];
+  son.addEventListener('timeupdate', () => {
+    if (!bouton.isConnected) return son.pause(); // écran quitté
+    const n = SORUD.lignes.findLastIndex(([, debut]) => son.currentTime >= debut);
+    lignes.forEach((l, k) => l.classList.toggle('active', k === n && !son.ended));
+    if (n >= 0 && !lignes[n].classList.contains('vue')) { lignes[n].classList.add('vue'); lignes[n].scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
+  });
+  const etat = () => { bouton.textContent = son.paused ? '▶️' : '⏸️'; app.querySelector('.drapeau-sorud')?.classList.toggle('flotte', !son.paused); };
+  for (const e of ['play', 'pause', 'ended']) son.addEventListener(e, etat);
+  son.addEventListener('ended', () => lignes.forEach((l) => l.classList.remove('active', 'vue')));
+  bouton.addEventListener('click', () => (son.paused ? son.play() : son.pause()));
+  lignes.forEach((l, n) => l.addEventListener('click', () => { son.currentTime = SORUD.lignes[n][1]; son.play(); }));
+  son.play().catch(() => {});
+  window.addEventListener('hashchange', () => son.pause(), { once: true });
 }
 
 /* ---------- Leçon ---------- */

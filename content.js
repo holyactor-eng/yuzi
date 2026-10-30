@@ -153,3 +153,18 @@ export const MATAL = [
       ['آبو خوردم', '😋'], ['نونو خوردم', '😊']],
   },
 ];
+
+// Sorud : l'hymne national (fichier fourni par Afshin). Chaque ligne s'allume à sa seconde de départ dans
+// audio/sorud.mp3 ; départs repérés sur les phrases chantées (whisper), à corriger à l'oreille si besoin.
+export const SORUD = {
+  titre: 'سرود ملی', emoji: '🇮🇷',
+  lignes: [
+    ['سر زد از افق مهر خاوران', 6.5],
+    ['فروغ دیدهٔ حق‌باوران', 12.8],
+    ['بهمن فرّ ایمان ماست', 19.6],
+    ['پیامت ای امام، استقلال، آزادی، نقش جان ماست', 24.3],
+    ['شهیدان، پیچیده در گوش زمان فریادتان', 34.6],
+    ['پاینده مانی و جاودان', 42.4],
+    ['جمهوری اسلامی ایران', 47.4],
+  ],
+};

@@ -213,3 +213,8 @@ fieldset { border: 0; padding: 0; margin: 0; }
 .matal .ligne.active span { animation: saute .6s ease-in-out infinite; display: inline-block; }
 .mascotte.danse { animation: saute .7s ease-in-out infinite; }
 main > .mascotte.grand, #app > .mascotte.grand { position: fixed; left: 16px; bottom: 16px; }
+/* Hymne : drapeau qui flotte pendant la lecture. */
+.carte-matal.sorud { border-color: #239f40; box-shadow: 0 5px 0 #239f40; }
+.drapeau-sorud { font-size: 6rem; text-align: center; line-height: 1.2; transform-origin: 10% 90%; }
+.drapeau-sorud.flotte { animation: flotte 1.4s ease-in-out infinite alternate; }
+@keyframes flotte { from { transform: rotate(-4deg) skewY(2deg); } to { transform: rotate(4deg) skewY(-2deg); } }
