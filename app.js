@@ -27,6 +27,7 @@ const UI = {
   serie: 'روز پشت سر هم',
   revision: 'مرور',
   autocollants: 'برچسب‌ها',
+  bagh: 'باغ من',
   nouvelAutocollant: 'برچسب تازه!',
   plusDeCoeurs: 'قلب‌ها تموم شد. فردا دوباره!',
   parler: 'حرف بزن',
@@ -61,11 +62,14 @@ function render() {
   if (!p) return ecranProfils();
   if (route.startsWith('lecon/')) return ecranLecon(p, route.slice(6));
   if (route === 'autocollants') return ecranAutocollants(p);
+  if (route === 'bagh') return ecranBagh(p);
   if (route === 'profils') return ecranProfils();
   // Tracer : on reprend à la dernière lettre de cet enfant.
   const gagner = (x) => {
     const d = donnees(p.id);
-    if (!d.autocollants.includes(x)) { d.autocollants.push(x); garder(p.id, d); }
+    if (!d.autocollants.includes(x)) d.autocollants.push(x);
+    d.progres = apresLecon(d.progres, { jour: jourLocal(), xp: 2 }); // une lettre tracée compte pour le jour (et le jardin)
+    garder(p.id, d);
   };
   if (route === 'tracer') return ecranTracer(app, get('trace.' + p.id, 0), gagner);
   if (route.startsWith('tracer/')) {
@@ -125,6 +129,7 @@ function ecranChemin(p) {
       <span class="badge" title="${UI.xp}">⭐ ${fa(xpDuJour(d.progres, jour))}/${fa(OBJECTIF_XP)}</span>
       ${coeurs}
       <a href="#/autocollants" class="badge" title="${UI.autocollants}">🎁 ${fa(d.autocollants.length)}</a>
+      <a href="#/bagh" class="badge" title="${UI.bagh}">🌷 ${fa(Object.keys(d.progres?.parJour ?? {}).length)}</a>
     </header>
     <section class="chemin">
       <a class="rond revision tracer-entree" href="#/tracer"><span>✍️</span><small>${UI.tracer}</small></a>
@@ -160,6 +165,27 @@ function ecranAutocollants(p) {
   app.querySelectorAll('.album .eu').forEach((b) => b.addEventListener('click', () => {
     ecouter(b.dataset.id);
     b.classList.remove('saute'); void b.offsetWidth; b.classList.add('saute');
+  }));
+}
+
+// Jardin : chaque jour où l'enfant a joué fait pousser une plante ; tous les 7 jours, un arbre.
+// Aujourd'hui pas encore joué : une pousse attend.
+const PLANTES = ['🌷', '🌻', '🌼', '🌹', '🌸', '🌺'];
+function ecranBagh(p) {
+  const d = donnees(p.id), jour = jourLocal();
+  const jours = Object.keys(d.progres?.parJour ?? {}).sort();
+  const plantes = jours.map((j, n) => ((n + 1) % 7 ? PLANTES[n % PLANTES.length] : '🌳'));
+  const attend = !jours.includes(jour);
+  h(`<header class="barre"><a href="#/" class="retour" aria-label="${UI.retour}">→</a><h1>${UI.bagh}</h1>
+      <span class="badge">🌷 ${fa(jours.length)}</span></header>
+    <section class="bagh">
+      <div class="ciel">☀️ <span class="nuage">☁️</span></div>
+      <div class="terre">${plantes.map((x, n) => `<button class="${jours[n] === jour ? 'neuve' : ''}">${x}</button>`).join('')}${attend ? '<button class="pousse">🌱</button>' : ''}</div>
+      <div class="mascotte grand">🐆</div>
+    </section>`);
+  app.querySelectorAll('.terre button').forEach((b) => b.addEventListener('click', () => {
+    b.classList.remove('saute'); void b.offsetWidth; b.classList.add('saute');
+    if (b.classList.contains('pousse')) location.hash = '#/';
   }));
 }
 

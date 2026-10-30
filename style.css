@@ -187,3 +187,15 @@ fieldset { border: 0; padding: 0; margin: 0; }
 .toile .vivant b { font-size: 2.5rem; font-weight: 900; background: #fffc; border-radius: 16px; padding: 0 16px; color: var(--encre); }
 .toile .vivant i { font-style: normal; color: #da0000; }
 @keyframes jaillir { from { transform: scale(.2); opacity: 0; } }
+/* Jardin : ciel, terre, une plante par jour joué. */
+.bagh { border-radius: 28px; overflow: hidden; background: linear-gradient(#bfe6ff, #e8f7ff 45%, #8fd16a 45%, #6fb84e); padding: 16px 16px 24px; position: relative; min-height: 60vh; }
+.bagh .ciel { font-size: 3rem; height: 25vh; }
+.bagh .nuage { display: inline-block; animation: nuage 12s ease-in-out infinite alternate; }
+@keyframes nuage { to { transform: translateX(-40vw); } }
+.bagh .terre { display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); gap: 8px; }
+.bagh .terre button { font-size: 2.75rem; background: #8a5a35; border: none; border-radius: 50% 50% 16px 16px; aspect-ratio: 1; box-shadow: inset 0 -6px 0 #6b4326; cursor: pointer; }
+.bagh .terre .saute { animation: saute .6s ease-in-out; }
+.bagh .neuve { animation: pousser .9s cubic-bezier(.3, 1.6, .5, 1) both; }
+.bagh .pousse { animation: saute 1.6s ease-in-out infinite; }
+@keyframes pousser { from { transform: scale(0) translateY(40px); } }
+.bagh .mascotte { position: absolute; left: 16px; bottom: 8px; font-size: 3.5rem; }
