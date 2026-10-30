@@ -1,0 +1,13 @@
+{
+  "name": "یوزی",
+  "short_name": "یوزی",
+  "lang": "fa",
+  "dir": "rtl",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#fff8ec",
+  "theme_color": "#fff8ec",
+  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}
