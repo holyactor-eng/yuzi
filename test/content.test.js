@@ -27,3 +27,10 @@ test('emoji uniques : une image = un seul mot', () => {
   const e = Object.values(MOTS).map((x) => x.emoji);
   assert.equal(new Set(e).size, e.length);
 });
+
+test('alphabet : 32 lettres, réservé aux 8 ans et plus', () => {
+  const alphabet = UNITES.find((u) => u.id === 'alphabet');
+  assert.deepEqual(alphabet.groupes, ['moyen', 'grand']);
+  assert.equal(new Set(alphabet.lecons.flatMap((l) => l.items)).size, 32);
+  for (const l of alphabet.lecons) for (const i of l.items) assert.ok(MOTS[i].lettre, i);
+});

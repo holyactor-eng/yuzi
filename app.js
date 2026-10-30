@@ -98,13 +98,14 @@ function ecranNouveau() {
 }
 
 // Une leçon s'ouvre quand la précédente (dans l'ordre du programme) est faite.
-const toutesLecons = () => UNITES.flatMap((u) => u.lecons.map((l) => ({ ...l, unite: u })));
-const ouverte = (d, i) => i === 0 || d.lecons[toutesLecons()[i - 1].id];
+const unitesPour = (p) => UNITES.filter((u) => !u.groupes || u.groupes.includes(p.groupe));
+const toutesLecons = (p) => unitesPour(p).flatMap((u) => u.lecons.map((l) => ({ ...l, unite: u })));
+const ouverte = (p, d, i) => i === 0 || d.lecons[toutesLecons(p)[i - 1].id];
 
 function ecranChemin(p) {
   const d = donnees(p.id), jour = jourLocal();
   const aRevoir = dus(d.cartes, jour);
-  const lecons = toutesLecons();
+  const lecons = toutesLecons(p);
   const coeurs = p.groupe === 'grand' && p.coeurs ? `<span class="badge">❤️ ${fa(coeursDuJour(d.coeurs, jour))}</span>` : '';
   h(`<header class="barre">
       <a href="#/profils" class="avatar-petit">${p.avatar}</a>
@@ -115,10 +116,10 @@ function ecranChemin(p) {
     </header>
     <section class="chemin">
       ${aRevoir.length >= 3 ? `<a class="rond revision" href="#/lecon/revision"><span>🔁</span><small>${UI.revision}</small></a>` : ''}
-      ${UNITES.map((u) => `<div class="unite"><h2><span>${u.emoji}</span> ${esc(u.titre)}</h2>
+      ${unitesPour(p).map((u) => `<div class="unite"><h2><span>${u.emoji}</span> ${esc(u.titre)}</h2>
         ${u.lecons.map((l) => {
           const i = lecons.findIndex((x) => x.id === l.id);
-          const fait = d.lecons[l.id], ok = ouverte(d, i);
+          const fait = d.lecons[l.id], ok = ouverte(p, d, i);
           const contenu = fait ? '✓' : ok ? MOTS[l.items[0]].emoji : '🔒';
           return ok
             ? `<a class="rond ${fait ? 'fait' : 'actuel'}" style="--decalage:${Math.sin(i * 1.2) * 80}px" href="#/lecon/${l.id}">${contenu}</a>`
@@ -138,7 +139,7 @@ function ecranAutocollants(p) {
 function ecranLecon(p, idLecon) {
   const d = donnees(p.id), jour = jourLocal();
   const revision = idLecon === 'revision';
-  const lecon = toutesLecons().find((l) => l.id === idLecon);
+  const lecon = toutesLecons(p).find((l) => l.id === idLecon);
   if (!revision && !lecon) { location.hash = '#/'; return; }
   const items = revision ? dus(d.cartes, jour).slice(0, 6) : lecon.items;
   const revisions = revision ? [] : dus(d.cartes, jour).filter((x) => !items.includes(x)).slice(0, 2);
@@ -212,7 +213,7 @@ function ecranLecon(p, idLecon) {
     let nouveau = null;
     if (!revision && !dd.lecons[idLecon]) {
       dd.lecons[idLecon] = true;
-      nouveau = auHasard(lecon.items.map((id) => MOTS[id].emoji).filter((x) => !dd.autocollants.includes(x))) ?? null;
+      nouveau = auHasard(lecon.items.filter((id) => !MOTS[id].lettre).map((id) => MOTS[id].emoji).filter((x) => !dd.autocollants.includes(x))) ?? null;
       if (nouveau) dd.autocollants.push(nouveau);
     }
     garder(p.id, dd);

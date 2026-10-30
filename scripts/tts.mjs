@@ -5,7 +5,7 @@ import { execFileSync } from 'node:child_process';
 import { MOTS, CONSIGNES } from '../content.js';
 
 const sons = [
-  ...Object.values(MOTS).map((m) => [m.id, m.parle, 'fa-IR-DilaraNeural']),
+  ...Object.values(MOTS).map((m) => [m.id, m.voix ?? m.parle, 'fa-IR-DilaraNeural']),
   ...Object.entries(CONSIGNES).map(([t, texte]) => ['ui-' + t, texte, 'fa-IR-FaridNeural']),
 ];
 const forcer = process.argv.slice(2);

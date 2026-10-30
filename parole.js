@@ -7,9 +7,11 @@ export const normaliser = (t) =>
 export const decider = (reconnu, attendu) => Boolean(reconnu) && normaliser(reconnu) === normaliser(attendu);
 
 // Le moteur ne choisit qu'entre les mots connus et « inconnu » : bien plus fiable sur une voix d'enfant.
-// Tous les mots servent de leurres : le moteur force toujours un mot de la liste, plus elle est longue, moins il tombe par hasard sur le bon.
+// Tous les mots de même nature servent de leurres : le moteur force toujours un mot de la liste, plus elle est longue,
+// moins il tombe par hasard sur le bon. Mots et noms de lettres à part : « گاو » se confondait avec « گاف ».
 export const grammaire = (id, mots) =>
-  [...new Set([id, ...Object.keys(mots)])].map((x) => normaliser(mots[x].parle)).concat('[unk]');
+  [...new Set([id, ...Object.keys(mots).filter((x) => !mots[x].lettre === !mots[id].lettre)])]
+    .map((x) => normaliser(mots[x].parle)).concat('[unk]');
 
 // Moteur chargé une fois (53 Mo la première fois, ensuite depuis le cache) ; null si la tablette ne peut pas.
 let modele;

@@ -11,8 +11,10 @@ export const typesPour = (profil) => TYPES[profil];
 const LETTRES_LEURRES = [...'ابپتسجچخدرزشفکگلمنوهی'];
 
 // Un type ne convient pas à tous les mots : les blocs veulent plusieurs mots, l'écriture un mot court.
+// Une lettre s'entend et se dit (si la reconnaissance connaît son nom) ; la lire ou l'écrire seule serait de la copie.
 const convient = (type, mot) =>
-  type === 'blocs' ? mot.ecrit.includes(' ') : type === 'ecris' ? !/[\s‌]/.test(mot.ecrit) && mot.ecrit.length <= 6 : true;
+  mot.lettre ? type === 'ecoute' || type === 'paires' || (type === 'dis' && mot.dire !== false)
+  : type === 'blocs' ? mot.ecrit.includes(' ') : type === 'ecris' ? !/[\s‌]/.test(mot.ecrit) && mot.ecrit.length <= 6 : true;
 
 function melanger(liste, hasard) {
   const l = [...liste];

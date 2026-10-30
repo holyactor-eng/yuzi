@@ -49,3 +49,18 @@ test('révisions : chaque mot dû apparaît dans la leçon', () => {
   const ex = genererLecon(['salam', 'merci'], 'petit', MOTS, { revisions: ['na'], hasard: graine(3) });
   assert.ok(ex.some((e) => e.mot === 'na' || e.mots?.includes('na')));
 });
+
+test('lettres : seulement écouter, paires et dire ; jamais dire une lettre que la reconnaissance ne connaît pas', () => {
+  const L = {
+    'l-be': { id: 'l-be', parle: 'به', ecrit: 'ب', emoji: 'ب', lettre: true, proches: ['l-pe', 'l-te', 'l-mim'] },
+    'l-pe': { id: 'l-pe', parle: 'په', ecrit: 'پ', emoji: 'پ', lettre: true, proches: ['l-be', 'l-te', 'l-mim'] },
+    'l-te': { id: 'l-te', parle: 'ته', ecrit: 'ت', emoji: 'ت', lettre: true, proches: ['l-be', 'l-pe', 'l-mim'] },
+    'l-mim': { id: 'l-mim', parle: 'میم', ecrit: 'م', emoji: 'م', lettre: true, dire: false, proches: ['l-be', 'l-pe', 'l-te'] },
+  };
+  for (let s = 1; s < 30; s++) {
+    for (const e of genererLecon(Object.keys(L), 'grand', L, { hasard: graine(s) })) {
+      assert.ok(['ecoute', 'paires', 'dis'].includes(e.type), e.type);
+      assert.ok(!(e.type === 'dis' && e.mot === 'l-mim'));
+    }
+  }
+});

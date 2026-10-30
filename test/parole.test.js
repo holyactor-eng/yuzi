@@ -23,3 +23,9 @@ test('grammaire : mot attendu d\'abord, tous les autres mots en leurres, puis [u
   const mots = { b: { parle: 'بابا' }, a: { parle: 'مامان' }, c: { parle: 'مامان‌بزرگ' } };
   assert.deepEqual(grammaire('a', mots), ['مامان', 'بابا', 'مامان بزرگ', '[unk]']);
 });
+
+test('grammaire : les mots et les noms de lettres ne se servent pas de leurres', () => {
+  const mots = { gav: { parle: 'گاو' }, sag: { parle: 'سگ' }, gaf: { parle: 'گاف', lettre: true }, kaf: { parle: 'کاف', lettre: true } };
+  assert.deepEqual(grammaire('gav', mots), ['گاو', 'سگ', '[unk]']);
+  assert.deepEqual(grammaire('gaf', mots), ['گاف', 'کاف', '[unk]']);
+});
